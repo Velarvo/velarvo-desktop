@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+
+set -e
+
+cd frontend
+bunx lint-staged
+cd ..
+
+make fmt-go
+make lint-go
+GOCACHE="$(pwd)/.cache/go-build" go test ./ ./internal/... >/dev/null

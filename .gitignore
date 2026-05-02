@@ -1,0 +1,60 @@
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Editor and IDE settings
+.vscode/
+**/.vscode/
+.idea/
+**/.idea/
+*.swp
+*.swo
+*~
+
+# Local environment files
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+bun-debug.log*
+
+# Dependency directories
+node_modules/
+**/node_modules/
+
+# Frontend build outputs
+frontend/dist/*
+!frontend/dist/.keep
+frontend/coverage/
+frontend/.vite/
+frontend/.svelte-kit/
+frontend/.eslintcache
+frontend/package.json.md5
+*.tsbuildinfo
+
+# Go and test artifacts
+.cache/
+coverage.out
+coverage/
+*.coverprofile
+*.test
+
+# Build and packaging outputs
+build/bin/
+/dist/
+tmp/
+.tmp/
+t.*
+
+# Accidental root Bun lockfile
+/bun.lock
+
+# Archived local backup
+frontend-old/

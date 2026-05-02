@@ -1,0 +1,39 @@
+export function GetAuthState() {
+  return window['go']['app']['App']['GetAuthState']();
+}
+
+export function GetHomeDirectory() {
+  return window['go']['app']['App']['GetHomeDirectory']();
+}
+
+export function ListDirectory(arg1) {
+  return window['go']['app']['App']['ListDirectory'](arg1);
+}
+
+export function Login(arg1, arg2) {
+  return window['go']['app']['App']['Login'](arg1, arg2);
+}
+
+export function Logout() {
+  return window['go']['app']['App']['Logout']();
+}
+
+export function OnBeforeClose(arg1) {
+  return window['go']['app']['App']['OnBeforeClose'](arg1);
+}
+
+export function OnDomReady(arg1) {
+  return window['go']['app']['App']['OnDomReady'](arg1);
+}
+
+export function Refresh() {
+  return window['go']['app']['App']['Refresh']();
+}
+
+export function Register(arg1, arg2, arg3, arg4) {
+  return window['go']['app']['App']['Register'](arg1, arg2, arg3, arg4);
+}
+
+export function Startup(arg1) {
+  return window['go']['app']['App']['Startup'](arg1);
+}

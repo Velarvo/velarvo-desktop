@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, dev]
+  pull_request:
+    branches: [main, master]
+  workflow_call:
+
+env:
+  NODE_OPTIONS: "--max-old-space-size=4096"
+
+jobs:
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: bun install --frozen-lockfile
+
+      - name: Check formatting
+        run: make format-check
+
+      - name: Run ESLint
+        run: make lint-frontend
+
+      - name: Run frontend tests
+        run: make test-frontend
+
+      - name: Build frontend
+        run: make fe-build
+
+  go-lint:
+    name: Go Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v7
+        with:
+          version: v2.1.6
+          args: --config .golangci.yml ./ ./internal/...
+
+  go-test:
+    name: Go Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Install Linux test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgtk-3-dev \
+            libwebkit2gtk-4.1-dev \
+            pkg-config \
+            gcc \
+            libayatana-appindicator3-dev
+
+      - name: Run Go tests
+        run: make test-go

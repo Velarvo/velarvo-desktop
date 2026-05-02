@@ -1,0 +1,84 @@
+name: Build
+
+on:
+  push:
+    branches: [main, master]
+
+env:
+  NODE_OPTIONS: "--max-old-space-size=4096"
+  APP_NAME: Velarvo
+
+jobs:
+  build:
+    name: Build / ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: linux-amd64
+            os: ubuntu-latest
+            platform: linux/amd64
+            tags: webkit2_41
+
+          - name: windows-amd64
+            os: windows-latest
+            platform: windows/amd64
+
+          - name: macos-universal
+            os: macos-latest
+            platform: darwin/universal
+
+          - name: macos-arm64
+            os: macos-latest
+            platform: darwin/arm64
+
+          - name: macos-amd64
+            os: macos-latest
+            platform: darwin/amd64
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install Linux dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgtk-3-dev \
+            libwebkit2gtk-4.1-dev \
+            pkg-config \
+            gcc \
+            libayatana-appindicator3-dev
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: bun install --frozen-lockfile
+
+      - name: Build
+        shell: bash
+        run: |
+          TAGS="${{ matrix.tags }}"
+          if [ -n "$TAGS" ]; then
+            export PKG_CONFIG_PATH="/usr/lib/x86_64-linux-gnu/pkgconfig"
+            wails build -platform ${{ matrix.platform }} -o ${{ env.APP_NAME }} -clean -tags "$TAGS"
+          else
+            wails build -platform ${{ matrix.platform }} -o ${{ env.APP_NAME }} -clean
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APP_NAME }}-${{ matrix.name }}
+          path: build/bin/
+          if-no-files-found: ignore
+          retention-days: 3

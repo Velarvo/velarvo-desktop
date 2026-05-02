@@ -1,0 +1,23 @@
+import {types} from '../models';
+import {app} from '../models';
+import {context} from '../models';
+
+export function GetAuthState():Promise<types.APIResponse_map_string_string_>;
+
+export function GetHomeDirectory():Promise<string>;
+
+export function ListDirectory(arg1:string):Promise<Array<app.ExplorerNode>>;
+
+export function Login(arg1:string,arg2:string):Promise<types.APIResponse_map_string_string_>;
+
+export function Logout():Promise<types.APIResponse_map_string_string_>;
+
+export function OnBeforeClose(arg1:context.Context):Promise<boolean>;
+
+export function OnDomReady(arg1:context.Context):Promise<void>;
+
+export function Refresh():Promise<types.APIResponse_map_string_string_>;
+
+export function Register(arg1:string,arg2:string,arg3:string,arg4:string):Promise<types.APIResponse_map_string_string_>;
+
+export function Startup(arg1:context.Context):Promise<void>;

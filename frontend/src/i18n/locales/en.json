@@ -1,0 +1,174 @@
+{
+  "auth": {
+    "onboarding": {
+      "title": "Set a master password",
+      "subtitle": "Create a password to encrypt your saved connections",
+      "stepMasterPassword": "Step 1 of 2 · Security setup",
+      "stepCloudSync": "Step 2 of 2 · Optional cloud sync",
+      "warning": "Important: This password cannot be recovered. If you forget it, you will lose access to all your data.",
+      "masterPassword": "Master Password",
+      "confirmPassword": "Confirm Master Password",
+      "passwordPlaceholder": "At least 12 characters",
+      "confirmPasswordPlaceholder": "Enter password again",
+      "passwordStrength": "Password strength",
+      "creatingVault": "Creating vault...",
+      "validation": {
+        "passwordMin": "Master password must be at least 12 characters"
+      },
+      "requirements": {
+        "minLength": "At least 12 characters",
+        "letter": "Contains at least one letter",
+        "number": "Contains at least one number"
+      },
+      "createVault": "Create vault",
+      "securityNote": "End-to-end encrypted and stored locally",
+      "success": {
+        "title": "Vault created!",
+        "subtitle": "Your data is secured and stored locally",
+        "masterPasswordReady": "Master password is set. Your vault is now protected.",
+        "cloudSync": {
+          "title": "Sync between devices?",
+          "description": "Create an account to back up your encrypted vault",
+          "feature1": "Sync across unlimited devices",
+          "feature2": "End-to-end encrypted backup",
+          "feature3": "$5/month",
+          "enable": "Turn on cloud sync",
+          "skip": "Not now"
+        },
+        "laterNote": "You can turn on cloud sync later in settings"
+      }
+    },
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Use your Velarvo account",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot password?",
+      "rememberMe": "Remember me",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create account"
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Create your Velarvo account",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "acceptTerms": "I agree to the",
+      "terms": "terms of service",
+      "and": "and",
+      "privacy": "privacy policy",
+      "submit": "Create account",
+      "submitting": "Creating account...",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "unlock": {
+      "title": "Unlock vault",
+      "pin": "Enter PIN",
+      "masterPassword": "Master password",
+      "useMaster": "Use master password instead",
+      "biometric": "Use Touch ID",
+      "submit": "Unlock",
+      "submitting": "Unlocking..."
+    },
+    "masterPassword": {
+      "title": "Set up master password",
+      "subtitle": "This password encrypts your vault. It cannot be recovered.",
+      "password": "Master password",
+      "confirmPassword": "Confirm master password",
+      "submit": "Set up vault",
+      "submitting": "Setting up..."
+    },
+    "choice": {
+      "title": "Open Velarvo",
+      "subtitle": "Choose how to continue",
+      "login": "Sign in",
+      "loginDesc": "Sign in to your account for full access",
+      "guest": "Continue as guest",
+      "guestDesc": "Open the app without an account",
+      "terms": "By continuing, you agree to our",
+      "tos": "Terms of Service",
+      "privacy": "Privacy Policy"
+    },
+    "or": "or"
+  },
+  "errors": {
+    "AUTH_INVALID_CREDENTIALS": "Invalid email or password",
+    "AUTH_EMAIL_EXISTS": "Email already exists",
+    "AUTH_ACCOUNT_DISABLED": "Account has been disabled",
+    "AUTH_DEVICE_REVOKED": "This device has been revoked",
+    "AUTH_INVALID_TOKEN": "Session expired, please sign in again",
+    "USER_NOT_FOUND": "User not found",
+    "DEVICE_ERROR": "Could not identify device",
+    "REMOTE_CALL_ERROR": "Connection error, please try again",
+    "KEYCHAIN_ERROR": "Error saving credentials",
+    "INVALID_RESPONSE": "Unexpected server response",
+    "SESSION_EXPIRED": "Session expired, please sign in again",
+    "NOT_AUTHENTICATED": "Not signed in",
+    "INVALID_PIN": "Incorrect PIN",
+    "PIN_ATTEMPTS_EXCEEDED": "Too many attempts, use master password",
+    "VAULT_LOCKED": "Vault is locked",
+    "CLIENT_ERROR": "An unexpected error occurred",
+    "UNKNOWN": "An unexpected error occurred, please try again"
+  },
+  "validation": {
+    "emailRequired": "Email is required",
+    "emailInvalid": "Invalid email address",
+    "passwordRequired": "Password is required",
+    "passwordMin": "Password must be at least 8 characters",
+    "firstNameRequired": "First name is required",
+    "lastNameRequired": "Last name is required",
+    "confirmPasswordRequired": "Please confirm your password",
+    "passwordsMismatch": "Passwords do not match",
+    "acceptTermsRequired": "You must accept the terms"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back",
+    "continue": "Continue",
+    "loading": "Loading...",
+    "e2eEncrypted": "End-to-end encrypted vault",
+    "and": "and"
+  },
+  "settings": {
+    "language": "Language",
+    "theme": "Theme"
+  },
+  "sidebar": {
+    "empty": "You don't have any sections yet. Add your first custom section below.",
+    "addSection": "Add section",
+    "sectionNamePlaceholder": "Section name",
+    "blockNamePlaceholder": "Block name",
+    "newBlockName": "New block",
+    "noConnections": "No connections yet.",
+    "ariaLabels": {
+      "addNewBlock": "Add new block",
+      "sectionOptions": "Section options",
+      "blockOptions": "Block options",
+      "dragBlock": "Drag block"
+    },
+    "menu": {
+      "addNewBlock": "Add new block",
+      "rename": "Rename",
+      "delete": "Delete",
+      "deleteSection": "Delete section"
+    },
+    "blockTypes": {
+      "rest": "REST API",
+      "graphql": "GraphQL",
+      "ssh": "SSH"
+    },
+    "addSectionPanel": {
+      "title": "Add section",
+      "customSection": "Custom section",
+      "customSectionPlaceholder": "e.g. Messaging",
+      "add": "Add"
+    }
+  }
+}

@@ -1,0 +1,64 @@
+@import 'tailwindcss';
+
+@theme inline {
+  --color-background: #0d0d0d;
+  --color-foreground: #fafafa;
+  --color-card: #0a0a0a;
+  --color-card-foreground: #fafafa;
+  --color-popover: #0a0a0a;
+  --color-popover-foreground: #fafafa;
+
+  --color-primary: #12ce90;
+  --color-primary-foreground: #1a1a1a;
+  --color-secondary: #262626;
+  --color-secondary-foreground: #fafafa;
+  --color-muted: #262626;
+  --color-muted-foreground: #a3a3a3;
+  --color-accent: #262626;
+  --color-accent-foreground: #fafafa;
+  --color-destructive: #bd0000;
+  --color-destructive-foreground: #fafafa;
+
+  --color-border: #262626;
+  --color-input: #262626;
+  --color-ring: #d3d3d3;
+
+  --color-chart-1: #3366ff;
+  --color-chart-2: #39a17a;
+  --color-chart-3: #f4c23a;
+  --color-chart-4: #a566ff;
+  --color-chart-5: #ff5999;
+
+  --color-sidebar-background: #1a1b1a;
+  --color-sidebar-foreground: #f4f4f4;
+  --color-sidebar-primary: #497bb3;
+  --color-sidebar-primary-foreground: #ffffff;
+  --color-sidebar-accent: #292c2c;
+  --color-sidebar-accent-foreground: #f4f4f4;
+  --color-sidebar-border: #292c2c;
+  --color-sidebar-ring: #3fbb96;
+}
+.drag-region {
+  -webkit-app-region: drag;
+  --wails-draggable: drag;
+}
+
+.drag-region * {
+  -webkit-app-region: no-drag;
+  pointer-events: none;
+}
+
+body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+* {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
