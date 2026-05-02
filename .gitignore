@@ -53,8 +53,6 @@ tmp/
 .tmp/
 t.*
 
-# Accidental root Bun lockfile
-/bun.lock
 
 # Archived local backup
 frontend-old/

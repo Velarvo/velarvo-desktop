@@ -1,0 +1,5 @@
+set -e
+
+# Run full test suites before pushing — slower, but catches regressions
+make test-go
+(cd frontend && bun run test)
