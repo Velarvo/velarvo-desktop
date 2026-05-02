@@ -16,9 +16,14 @@
 
 <AppLayout>
   <div class="h-full w-full max-w-full p-3 sm:p-4">
-    <div class="h-full w-full max-w-full mx-auto flex flex-col">
-      <div class="flex-1 min-h-0 w-full max-w-full">
-        <FileExplorer {...dashboardExplorer} />
+    <div class="w-full max-w-full mx-auto flex flex-col gap-4">
+      <div class="w-full max-w-full">
+        <FileExplorer
+          {...dashboardExplorer}
+          className="w-full"
+          viewportClassName="overflow-auto"
+          viewportMaxHeight="calc(100vh - 14rem)"
+        />
       </div>
     </div>
   </div>

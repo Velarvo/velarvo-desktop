@@ -62,6 +62,12 @@
   export let showCopyAction = true
   export let showHiddenToggle = true
   export let groupContainersFirst = true
+  export let className = ''
+  export let viewportClassName = ''
+  export let contentClassName = ''
+  export let fillHeight = false
+  export let viewportHeight = ''
+  export let viewportMaxHeight = '32rem'
 
   let currentPath = ''
   let homePath = ''
@@ -461,6 +467,12 @@
   $: parentPath = currentPath ? resolveParentPath(currentPath) : ''
 
   $: normalizedSearchQuery = searchQuery.trim().toLowerCase()
+  $: viewportStyles = [
+    viewportHeight ? `height: ${viewportHeight}` : '',
+    !fillHeight && viewportMaxHeight ? `max-height: ${viewportMaxHeight}` : '',
+  ]
+    .filter(Boolean)
+    .join('; ')
 
   $: filtered = nodes
     .filter((item) =>
@@ -497,7 +509,7 @@
 </script>
 
 <div
-  class="h-full min-h-0 w-full max-w-full flex flex-col rounded-xl border border-border overflow-hidden"
+  class={`${fillHeight ? 'h-full' : ''} min-h-0 min-w-0 w-full max-w-full flex flex-col rounded-xl border border-border overflow-hidden ${className}`.trim()}
   aria-busy={isLoading || isRefreshing}
 >
   <div class="border-b border-border p-3 flex flex-wrap items-center gap-2">
@@ -652,7 +664,10 @@
     </div>
   {/if}
 
-  <div class="flex-1 min-h-0 overflow-auto">
+  <div
+    class={`flex-1 min-h-0 min-w-0 overflow-auto ${viewportClassName}`.trim()}
+    style={viewportStyles}
+  >
     {#if isLoading}
       <div
         class="h-full flex items-center justify-center text-sm text-muted-foreground"
@@ -666,98 +681,100 @@
         {mergedLabels.empty}
       </div>
     {:else}
-      <table class="w-full min-w-175 text-sm">
-        <thead class="sticky top-0 bg-[#0c0c12] border-b border-border">
-          <tr class="text-left text-muted-foreground">
-            <th class="px-3 py-0 font-medium">
-              <button
-                type="button"
-                class="w-full h-8 px-1 inline-flex items-center gap-1.5 rounded text-left text-xs transition-colors {isSortColumn(
-                  'name',
-                )
-                  ? 'text-white'
-                  : 'text-muted-foreground hover:text-white'}"
-                on:click={() => setSort('name')}
-              >
-                <span>{mergedLabels.nameColumn}</span>
-                {#if isSortColumn('name')}
-                  {#if sortOrder === 'asc'}
-                    <ArrowUp class="h-3 w-3 text-primary" />
-                  {:else}
-                    <ArrowDown class="h-3 w-3 text-primary" />
-                  {/if}
-                {/if}
-              </button>
-            </th>
-            {#each columns as column}
-              <th class="px-3 py-0 font-medium {column.widthClass ?? ''}">
-                {#if column.sortable === false}
-                  <span
-                    class="w-full h-8 px-1 inline-flex items-center rounded text-left text-xs"
-                    >{column.label}</span
-                  >
-                {:else}
-                  <button
-                    type="button"
-                    class="w-full h-8 px-1 inline-flex items-center gap-1.5 rounded text-left text-xs transition-colors {isSortColumn(
-                      column.id,
-                    )
-                      ? 'text-white'
-                      : 'text-muted-foreground hover:text-white'}"
-                    on:click={() => setSort(column.id)}
-                  >
-                    <span>{column.label}</span>
-                    {#if isSortColumn(column.id)}
-                      {#if sortOrder === 'asc'}
-                        <ArrowUp class="h-3 w-3 text-primary" />
-                      {:else}
-                        <ArrowDown class="h-3 w-3 text-primary" />
-                      {/if}
-                    {/if}
-                  </button>
-                {/if}
-              </th>
-            {/each}
-          </tr>
-        </thead>
-        <tbody>
-          {#each filtered as node}
-            <tr
-              class="border-b border-border/60 hover:bg-white/3 cursor-default"
-              on:dblclick={() => void activateNode(node)}
-            >
-              <td class="px-3 py-2">
-                {#if isContainerNode(node)}
-                  <button
-                    type="button"
-                    class="inline-flex items-center gap-2 text-left text-white hover:text-primary hover:underline cursor-pointer"
-                    on:click={() => void activateNode(node)}
-                    title={mergedLabels.openContainer}
-                  >
-                    <FileIcon name={node.name} isContainer />
-                    <span class="truncate">{node.name}</span>
-                  </button>
-                {:else}
-                  <div
-                    class="inline-flex items-center gap-2 text-left text-white cursor-default"
-                  >
-                    <FileIcon name={node.name} />
-                    <span class="truncate">{node.name}</span>
-                  </div>
-                {/if}
-              </td>
-              {#each columns as column}
-                <td
-                  class="px-3 py-2 text-muted-foreground {column.cellClass ??
-                    ''}"
+      <div class={`min-w-full ${contentClassName}`.trim()}>
+        <table class="w-full min-w-175 text-sm">
+          <thead class="sticky top-0 bg-[#0c0c12] border-b border-border">
+            <tr class="text-left text-muted-foreground">
+              <th class="px-3 py-0 font-medium">
+                <button
+                  type="button"
+                  class="w-full h-8 px-1 inline-flex items-center gap-1.5 rounded text-left text-xs transition-colors {isSortColumn(
+                    'name',
+                  )
+                    ? 'text-white'
+                    : 'text-muted-foreground hover:text-white'}"
+                  on:click={() => setSort('name')}
                 >
-                  {column.render(node)}
-                </td>
+                  <span>{mergedLabels.nameColumn}</span>
+                  {#if isSortColumn('name')}
+                    {#if sortOrder === 'asc'}
+                      <ArrowUp class="h-3 w-3 text-primary" />
+                    {:else}
+                      <ArrowDown class="h-3 w-3 text-primary" />
+                    {/if}
+                  {/if}
+                </button>
+              </th>
+              {#each columns as column}
+                <th class="px-3 py-0 font-medium {column.widthClass ?? ''}">
+                  {#if column.sortable === false}
+                    <span
+                      class="w-full h-8 px-1 inline-flex items-center rounded text-left text-xs"
+                      >{column.label}</span
+                    >
+                  {:else}
+                    <button
+                      type="button"
+                      class="w-full h-8 px-1 inline-flex items-center gap-1.5 rounded text-left text-xs transition-colors {isSortColumn(
+                        column.id,
+                      )
+                        ? 'text-white'
+                        : 'text-muted-foreground hover:text-white'}"
+                      on:click={() => setSort(column.id)}
+                    >
+                      <span>{column.label}</span>
+                      {#if isSortColumn(column.id)}
+                        {#if sortOrder === 'asc'}
+                          <ArrowUp class="h-3 w-3 text-primary" />
+                        {:else}
+                          <ArrowDown class="h-3 w-3 text-primary" />
+                        {/if}
+                      {/if}
+                    </button>
+                  {/if}
+                </th>
               {/each}
             </tr>
-          {/each}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {#each filtered as node}
+              <tr
+                class="border-b border-border/60 hover:bg-white/3 cursor-default"
+                on:dblclick={() => void activateNode(node)}
+              >
+                <td class="px-3 py-2">
+                  {#if isContainerNode(node)}
+                    <button
+                      type="button"
+                      class="inline-flex items-center gap-2 text-left text-white hover:text-primary hover:underline cursor-pointer"
+                      on:click={() => void activateNode(node)}
+                      title={mergedLabels.openContainer}
+                    >
+                      <FileIcon name={node.name} isContainer />
+                      <span class="truncate">{node.name}</span>
+                    </button>
+                  {:else}
+                    <div
+                      class="inline-flex items-center gap-2 text-left text-white cursor-default"
+                    >
+                      <FileIcon name={node.name} />
+                      <span class="truncate">{node.name}</span>
+                    </div>
+                  {/if}
+                </td>
+                {#each columns as column}
+                  <td
+                    class="px-3 py-2 text-muted-foreground {column.cellClass ??
+                      ''}"
+                  >
+                    {column.render(node)}
+                  </td>
+                {/each}
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
     {/if}
   </div>
 </div>

@@ -102,4 +102,31 @@ describe('FileExplorer', () => {
       expect(screen.getByText('archive.zip')).toBeTruthy()
     })
   })
+
+  it('accepts custom layout classes for reusable embedding', async () => {
+    const dataSource = createDataSource()
+
+    const { container } = render(FileExplorer, {
+      props: {
+        dataSource,
+        className: 'w-full shadow-xl',
+        viewportClassName: 'max-h-40',
+        contentClassName: 'min-w-[48rem]',
+        viewportMaxHeight: '18rem',
+      },
+    })
+
+    await screen.findByText('Documents')
+
+    const root = container.firstElementChild
+    expect(root?.className).toContain('shadow-xl')
+    expect(root?.className).toContain('w-full')
+
+    const viewport = container.querySelector('.max-h-40')
+    expect(viewport).toBeTruthy()
+    expect(viewport?.getAttribute('style')).toContain('max-height: 18rem')
+
+    const content = container.querySelector('.min-w-\\[48rem\\]')
+    expect(content).toBeTruthy()
+  })
 })
