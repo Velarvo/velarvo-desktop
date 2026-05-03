@@ -18,6 +18,7 @@
   import {
     DEFAULT_EXPLORER_LABELS,
     type ExplorerColumn,
+    type ExplorerColumnBreakpoint,
     type ExplorerDataSource,
     type ExplorerLabels,
     type ExplorerNode,
@@ -124,6 +125,19 @@
 
   const getColumn = (columnId: string) => {
     return columns.find((column) => column.id === columnId) ?? null
+  }
+
+  const HIDE_BELOW_CLASS: Record<ExplorerColumnBreakpoint, string> = {
+    xs: '@max-xs:hidden',
+    sm: '@max-sm:hidden',
+    md: '@max-md:hidden',
+    lg: '@max-lg:hidden',
+    xl: '@max-xl:hidden',
+    '2xl': '@max-2xl:hidden',
+  }
+
+  const getResponsiveHideClass = (column: ExplorerColumn) => {
+    return column.hideBelow ? HIDE_BELOW_CLASS[column.hideBelow] : ''
   }
 
   const getSortValue = (node: ExplorerNode, field: string) => {
@@ -509,7 +523,7 @@
 </script>
 
 <div
-  class={`${fillHeight ? 'h-full' : ''} min-h-0 min-w-0 w-full max-w-full flex flex-col rounded-xl border border-border overflow-hidden ${className}`.trim()}
+  class={`@container ${fillHeight ? 'h-full' : ''} min-h-0 min-w-0 w-full max-w-full flex flex-col rounded-xl border border-border overflow-hidden ${className}`.trim()}
   aria-busy={isLoading || isRefreshing}
 >
   <div class="border-b border-border p-3 flex flex-wrap items-center gap-2">
@@ -546,7 +560,7 @@
       /></button
     >
 
-    <div class="relative flex-[1_1_14rem] min-w-0 sm:min-w-55">
+    <div class="relative flex-1 min-w-0 basis-40 @md:basis-55">
       <Search
         class="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
       />
@@ -608,7 +622,7 @@
         {:else}
           <EyeOff class="h-3.5 w-3.5" />
         {/if}
-        <span>{mergedLabels.hidden}</span>
+        <span class="@max-md:hidden">{mergedLabels.hidden}</span>
       </button>
     {/if}
   </div>
@@ -647,10 +661,10 @@
       >
         {#if copiedPath}
           <Check class="h-3.5 w-3.5" />
-          <span>{mergedLabels.copied}</span>
+          <span class="@max-sm:hidden">{mergedLabels.copied}</span>
         {:else}
           <Copy class="h-3.5 w-3.5" />
-          <span>{mergedLabels.copy}</span>
+          <span class="@max-sm:hidden">{mergedLabels.copy}</span>
         {/if}
       </button>
     {/if}
@@ -682,7 +696,7 @@
       </div>
     {:else}
       <div class={`min-w-full ${contentClassName}`.trim()}>
-        <table class="w-full min-w-175 text-sm">
+        <table class="w-full table-fixed text-sm">
           <thead class="sticky top-0 bg-[#0c0c12] border-b border-border">
             <tr class="text-left text-muted-foreground">
               <th class="px-3 py-0 font-medium">
@@ -706,7 +720,10 @@
                 </button>
               </th>
               {#each columns as column}
-                <th class="px-3 py-0 font-medium {column.widthClass ?? ''}">
+                <th
+                  class="px-3 py-0 font-medium {column.widthClass ??
+                    ''} {getResponsiveHideClass(column)}"
+                >
                   {#if column.sortable === false}
                     <span
                       class="w-full h-8 px-1 inline-flex items-center rounded text-left text-xs"
@@ -722,12 +739,12 @@
                         : 'text-muted-foreground hover:text-white'}"
                       on:click={() => setSort(column.id)}
                     >
-                      <span>{column.label}</span>
+                      <span class="truncate">{column.label}</span>
                       {#if isSortColumn(column.id)}
                         {#if sortOrder === 'asc'}
-                          <ArrowUp class="h-3 w-3 text-primary" />
+                          <ArrowUp class="h-3 w-3 text-primary shrink-0" />
                         {:else}
-                          <ArrowDown class="h-3 w-3 text-primary" />
+                          <ArrowDown class="h-3 w-3 text-primary shrink-0" />
                         {/if}
                       {/if}
                     </button>
@@ -742,30 +759,32 @@
                 class="border-b border-border/60 hover:bg-white/3 cursor-default"
                 on:dblclick={() => void activateNode(node)}
               >
-                <td class="px-3 py-2">
+                <td class="px-3 py-2 min-w-0 max-w-0">
                   {#if isContainerNode(node)}
                     <button
                       type="button"
-                      class="inline-flex items-center gap-2 text-left text-white hover:text-primary hover:underline cursor-pointer"
+                      class="flex w-full items-center gap-2 text-left text-white hover:text-primary hover:underline cursor-pointer min-w-0"
                       on:click={() => void activateNode(node)}
-                      title={mergedLabels.openContainer}
+                      title={node.name}
                     >
                       <FileIcon name={node.name} isContainer />
-                      <span class="truncate">{node.name}</span>
+                      <span class="truncate min-w-0">{node.name}</span>
                     </button>
                   {:else}
                     <div
-                      class="inline-flex items-center gap-2 text-left text-white cursor-default"
+                      class="flex w-full items-center gap-2 text-left text-white cursor-default min-w-0"
+                      title={node.name}
                     >
                       <FileIcon name={node.name} />
-                      <span class="truncate">{node.name}</span>
+                      <span class="truncate min-w-0">{node.name}</span>
                     </div>
                   {/if}
                 </td>
                 {#each columns as column}
                   <td
-                    class="px-3 py-2 text-muted-foreground {column.cellClass ??
-                      ''}"
+                    class="px-3 py-2 text-muted-foreground truncate {column.cellClass ??
+                      ''} {getResponsiveHideClass(column)}"
+                    title={column.render(node)}
                   >
                     {column.render(node)}
                   </td>

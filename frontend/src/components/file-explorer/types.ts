@@ -13,12 +13,15 @@ export interface ExplorerBreadcrumb {
   path: string
 }
 
+export type ExplorerColumnBreakpoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'
+
 export interface ExplorerColumn {
   id: string
   label: string
   widthClass?: string
   cellClass?: string
   sortable?: boolean
+  hideBelow?: ExplorerColumnBreakpoint
   render: (node: ExplorerNode) => string
   sortValue?: (node: ExplorerNode) => string | number | null | undefined
 }

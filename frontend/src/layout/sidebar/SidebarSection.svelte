@@ -11,10 +11,19 @@
     Plus,
     Trash2,
   } from 'lucide-svelte'
-  import { IconApi, IconBrandGraphql, IconTerminal } from '@tabler/icons-svelte'
+  import { IconApi, IconBrandGraphql } from '@tabler/icons-svelte'
   import FloatingDropdown from '@/components/ui/FloatingDropdown.svelte'
   import { t } from '@/lib/i18n'
-  import type { ApiMethod, SidebarSection } from './types'
+  import {
+    DEFAULT_API_METHOD,
+    DEFAULT_GRAPHQL_METHOD,
+    isApiItem,
+  } from '@/lib/sidebar'
+  import type {
+    ApiMethod,
+    SidebarItemDraft,
+    SidebarSection,
+  } from '@/types/sidebar'
   import {
     sidebarDragStore,
     attachSidebarDragListeners,
@@ -35,11 +44,7 @@
     renameSection: { sectionId: string; label: string }
     addItem: {
       sectionId: string
-      name: string
-      type: string
-      status?: 'connected' | 'degraded' | 'disconnected'
-      method?: ApiMethod
-    }
+    } & SidebarItemDraft
     renameItem: { sectionId: string; itemId: string; name: string }
     removeItem: { sectionId: string; itemId: string }
     reorderItem: { sectionId: string; itemId: string; toIndex: number }
@@ -69,13 +74,10 @@
   let itemMenuContextY: number | null = null
 
   type NewBlockPreset = {
-    key: 'rest' | 'graphql' | 'ssh'
+    key: 'rest' | 'graphql'
     label: string
     icon: ComponentType
-    type: string
-    method?: ApiMethod
-    status?: 'connected' | 'degraded' | 'disconnected'
-  }
+  } & Omit<SidebarItemDraft, 'name'>
 
   const newBlockPresets: NewBlockPreset[] = [
     {
@@ -83,21 +85,14 @@
       label: t('sidebar.blockTypes.rest'),
       icon: IconApi,
       type: 'API',
-      method: 'GET',
+      method: DEFAULT_API_METHOD,
     },
     {
       key: 'graphql',
       label: t('sidebar.blockTypes.graphql'),
       icon: IconBrandGraphql,
       type: 'API',
-      method: 'GRAPHQL',
-    },
-    {
-      key: 'ssh',
-      label: t('sidebar.blockTypes.ssh'),
-      icon: IconTerminal,
-      type: 'SSH',
-      status: 'connected',
+      method: DEFAULT_GRAPHQL_METHOD,
     },
   ]
 
@@ -209,15 +204,6 @@
     closeItemMenu()
     if (!id) return
     dispatch('removeItem', { sectionId: section.id, itemId: id })
-  }
-
-  const isApiItem = (type?: string, method?: ApiMethod) => {
-    if (method) return true
-
-    const normalized = (type ?? '').toUpperCase()
-    return (
-      normalized === 'API' || normalized === 'REST' || normalized === 'GRAPHQL'
-    )
   }
 
   const openBlockTypePicker = () => {

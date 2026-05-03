@@ -1,6 +1,15 @@
 import { writable } from 'svelte/store'
 
-import type { ApiMethod, SidebarItem, SidebarSection } from './types'
+import {
+  DEFAULT_SECTION_KIND,
+  isApiMethod,
+  isSidebarItemStatus,
+} from '@/lib/sidebar'
+import type {
+  SidebarItem,
+  SidebarItemDraft,
+  SidebarSection,
+} from '@/types/sidebar'
 
 const STORAGE_KEY = 'velarvo.sidebar.sections.v1'
 
@@ -9,15 +18,7 @@ type SidebarSectionsStore = {
   addSection: (customLabel?: string) => SidebarSection | null
   removeSection: (sectionId: string) => void
   renameSection: (sectionId: string, label: string) => void
-  addItem: (
-    sectionId: string,
-    payload: {
-      name: string
-      type: string
-      status?: 'connected' | 'degraded' | 'disconnected'
-      method?: ApiMethod
-    },
-  ) => void
+  addItem: (sectionId: string, payload: SidebarItemDraft) => void
   removeItem: (sectionId: string, itemId: string) => void
   renameItem: (sectionId: string, itemId: string, name: string) => void
   reorderItem: (sectionId: string, itemId: string, toIndex: number) => void
@@ -43,16 +44,10 @@ const normalizeItem = (item: unknown): SidebarItem | null => {
   if (typeof candidate.name !== 'string') return null
   if (typeof candidate.type !== 'string') return null
 
-  const method =
-    typeof candidate.method === 'string'
-      ? (candidate.method as ApiMethod)
-      : undefined
-  const status =
-    candidate.status === 'connected' ||
-    candidate.status === 'degraded' ||
-    candidate.status === 'disconnected'
-      ? candidate.status
-      : undefined
+  const method = isApiMethod(candidate.method) ? candidate.method : undefined
+  const status = isSidebarItemStatus(candidate.status)
+    ? candidate.status
+    : undefined
 
   return {
     id: candidate.id,
@@ -78,7 +73,7 @@ const normalizeSection = (section: unknown): SidebarSection | null => {
   return {
     id: candidate.id,
     label: candidate.label,
-    kind: 'custom',
+    kind: DEFAULT_SECTION_KIND,
     items,
   }
 }
@@ -123,7 +118,7 @@ const createSidebarSectionsStore = (): SidebarSectionsStore => {
         created = {
           id: makeId('section'),
           label,
-          kind: 'custom',
+          kind: DEFAULT_SECTION_KIND,
           items: [],
         }
 
@@ -151,15 +146,7 @@ const createSidebarSectionsStore = (): SidebarSectionsStore => {
         }),
       )
     },
-    addItem(
-      sectionId: string,
-      payload: {
-        name: string
-        type: string
-        status?: 'connected' | 'degraded' | 'disconnected'
-        method?: ApiMethod
-      },
-    ) {
+    addItem(sectionId: string, payload: SidebarItemDraft) {
       update((sections) =>
         sections.map((section) => {
           if (section.id !== sectionId) return section
