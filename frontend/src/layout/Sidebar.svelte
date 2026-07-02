@@ -1,15 +1,25 @@
 <script lang="ts">
   import type { ComponentType } from 'svelte'
-  import {
-    Database,
-    Globe2,
-    KeyRound,
-    Plus,
-    Search,
-    Terminal,
-  } from 'lucide-svelte'
+  import { fly } from 'svelte/transition'
+  import { cubicOut } from 'svelte/easing'
+  import { Database, Globe, Plus, Search, Terminal } from 'lucide-svelte'
+  import ConnectionRow from '@/components/ssh/ConnectionRow.svelte'
   import FloatingDropdown from '@/components/ui/FloatingDropdown.svelte'
-  import { t } from '@/lib/i18n'
+  import { translate } from '@/lib/i18n'
+  import { navigate, route } from '@/lib/router'
+  import {
+    selectSSHConnection,
+    selectedSSHConnectionId,
+    sshConnections,
+  } from '@/lib/sshConnections'
+  import { matchesSSHQuery } from '@/lib/sshPresentation'
+  import {
+    draggingConnection,
+    EditorResourceKind,
+    EditorTabKind,
+    openContentTab,
+  } from '@/lib/editorLayout'
+  import type { SSHConnection } from '@/types/ssh'
   import type { SidebarItemDraft } from '@/types/sidebar'
 
   import SidebarAddSection from './sidebar/SidebarAddSection.svelte'
@@ -19,7 +29,7 @@
 
   export let collapsed = false
 
-  type SidebarMode = 'creds' | 'ssh' | 'db' | 'api'
+  type SidebarMode = 'ssh' | 'db' | 'api'
 
   type RailItem = {
     id: SidebarMode
@@ -29,21 +39,11 @@
     icon: ComponentType
   }
 
-  type ResourceItem = {
-    id: string
-    name: string
-    meta: string
-    detail: string
-    badge?: string
-    icon: ComponentType
-  }
-
   type ResourcePanel = {
     eyebrow: string
     title: string
     searchPlaceholder: string
     empty: string
-    items: ResourceItem[]
   }
 
   let activeMode: SidebarMode = 'api'
@@ -53,58 +53,85 @@
   let addSectionContainer: HTMLDivElement | null = null
   let initializedExpanded = false
 
-  const railItems: RailItem[] = [
-    {
-      id: 'creds',
-      label: 'Credentials',
-      shortLabel: 'Credentials',
-      description: 'Secrets, tokens and passwords',
-      icon: KeyRound,
-    },
+  let flyoutOpen = false
+  let flyoutTimer: ReturnType<typeof setTimeout> | null = null
+  let flyoutSuppressed = false
+  const FLYOUT_CLOSE_DELAY = 160
+
+  const clearFlyoutTimer = () => {
+    if (flyoutTimer) {
+      clearTimeout(flyoutTimer)
+      flyoutTimer = null
+    }
+  }
+
+  const openFlyout = () => {
+    if (!collapsed || flyoutSuppressed) return
+    clearFlyoutTimer()
+    flyoutOpen = true
+  }
+
+  const dismissFlyoutForDrag = () => {
+    if (!flyoutOpen && !flyoutTimer) return
+    flyoutSuppressed = true
+    clearFlyoutTimer()
+    flyoutOpen = false
+  }
+
+  const scheduleFlyoutClose = () => {
+    clearFlyoutTimer()
+    flyoutTimer = setTimeout(() => {
+      flyoutOpen = false
+      flyoutTimer = null
+    }, FLYOUT_CLOSE_DELAY)
+  }
+
+  $: if (!collapsed && (flyoutOpen || flyoutTimer)) {
+    clearFlyoutTimer()
+    flyoutOpen = false
+  }
+
+  let railItems: RailItem[] = []
+  let resourcePanels: Record<Exclude<SidebarMode, 'api'>, ResourcePanel>
+
+  $: railItems = [
     {
       id: 'ssh',
-      label: 'SSH',
-      shortLabel: 'SSH',
-      description: 'Servers and terminal access',
+      label: $translate('sidebar.rail.ssh.label'),
+      shortLabel: $translate('sidebar.rail.ssh.shortLabel'),
+      description: $translate('sidebar.rail.ssh.description'),
       icon: Terminal,
     },
     {
       id: 'db',
-      label: 'Databases',
-      shortLabel: 'DB',
-      description: 'Database connections',
+      label: $translate('sidebar.rail.databases.label'),
+      shortLabel: $translate('sidebar.rail.databases.shortLabel'),
+      description: $translate('sidebar.rail.databases.description'),
       icon: Database,
     },
     {
       id: 'api',
-      label: 'API',
-      shortLabel: 'API',
-      description: 'Collections and requests',
-      icon: Globe2,
+      label: $translate('sidebar.rail.api.label'),
+      shortLabel: $translate('sidebar.rail.api.shortLabel'),
+      description: $translate('sidebar.rail.api.description'),
+      icon: Globe,
     },
   ]
 
-  const resourcePanels: Record<Exclude<SidebarMode, 'api'>, ResourcePanel> = {
-    creds: {
-      eyebrow: 'Vault',
-      title: 'Credentials',
-      searchPlaceholder: 'Search credentials...',
-      empty: 'No credentials yet.',
-      items: [],
-    },
+  $: resourcePanels = {
     ssh: {
-      eyebrow: 'Access',
-      title: 'SSH Connections',
-      searchPlaceholder: 'Search SSH hosts...',
-      empty: 'No SSH connections yet.',
-      items: [],
+      eyebrow: $translate('sidebar.panels.ssh.eyebrow'),
+      title: $translate('sidebar.panels.ssh.title'),
+      searchPlaceholder: $translate('sidebar.panels.ssh.searchPlaceholder'),
+      empty: $translate('sidebar.panels.ssh.empty'),
     },
     db: {
-      eyebrow: 'Data',
-      title: 'Databases',
-      searchPlaceholder: 'Search connections...',
-      empty: 'No database connections yet.',
-      items: [],
+      eyebrow: $translate('sidebar.panels.databases.eyebrow'),
+      title: $translate('sidebar.panels.databases.title'),
+      searchPlaceholder: $translate(
+        'sidebar.panels.databases.searchPlaceholder',
+      ),
+      empty: $translate('sidebar.panels.databases.empty'),
     },
   }
 
@@ -114,15 +141,10 @@
   $: activeResourcePanel =
     activeMode === 'api' ? null : resourcePanels[activeMode]
   $: normalizedResourceSearch = resourceSearch.trim().toLowerCase()
-  $: filteredResourceItems = activeResourcePanel
-    ? activeResourcePanel.items.filter((item) => {
-        if (!normalizedResourceSearch) return true
-
-        return [item.name, item.meta, item.detail, item.badge ?? ''].some(
-          (value) => value.toLowerCase().includes(normalizedResourceSearch),
-        )
-      })
-    : []
+  $: sshConnectionList = $sshConnections.filter((connection) =>
+    matchesSSHQuery(connection, normalizedResourceSearch),
+  )
+  $: hasSSHMatches = sshConnectionList.length > 0
 
   $: if (!initializedExpanded && sections.length > 0) {
     expanded = sections.map((section) => section.id)
@@ -138,6 +160,109 @@
     activeMode = mode
     resourceSearch = ''
     showAddSectionPanel = false
+
+    if ($route !== '/dashboard') {
+      navigate('/dashboard')
+    }
+  }
+
+  const goToDashboard = () => {
+    if ($route !== '/dashboard') navigate('/dashboard')
+  }
+
+  const handleCreateSSHConnection = () => {
+    activeMode = 'ssh'
+    resourceSearch = ''
+    openContentTab(
+      {
+        title: 'New SSH connection',
+        kind: EditorTabKind.SSHConnectionForm,
+        data: {},
+      },
+      {
+        isSame: (tab) =>
+          tab.kind === EditorTabKind.SSHConnectionForm &&
+          tab.data.connectionId === undefined,
+      },
+    )
+    goToDashboard()
+  }
+
+  const handleSelectSSHConnection = (id: string) => {
+    activeMode = 'ssh'
+    selectSSHConnection(id)
+
+    const connection = $sshConnections.find((item) => item.id === id)
+    if (connection) {
+      openContentTab(
+        {
+          title: connection.name,
+          kind: EditorTabKind.SSHConnectionForm,
+          data: { connectionId: id },
+        },
+        {
+          isSame: (tab) =>
+            tab.kind === EditorTabKind.SSHConnectionForm &&
+            tab.data.connectionId === id,
+        },
+      )
+    }
+    goToDashboard()
+  }
+
+  const handleOpenSSHTerminal = (id: string) => {
+    activeMode = 'ssh'
+    selectSSHConnection(id)
+
+    const connection = $sshConnections.find((item) => item.id === id)
+    if (connection) {
+      openContentTab({
+        title: `${connection.name} · ${$translate('ssh.terminal', 'Terminal')}`,
+        kind: EditorTabKind.SSHTerminal,
+        data: { connectionId: id },
+      })
+    }
+    goToDashboard()
+  }
+
+  let clickTimer: ReturnType<typeof setTimeout> | null = null
+  const CLICK_DELAY = 220
+
+  const onConnectionClick = (id: string) => {
+    if (clickTimer) clearTimeout(clickTimer)
+    clickTimer = setTimeout(() => {
+      clickTimer = null
+      handleSelectSSHConnection(id)
+    }, CLICK_DELAY)
+  }
+
+  const onConnectionDblClick = (id: string) => {
+    if (clickTimer) {
+      clearTimeout(clickTimer)
+      clickTimer = null
+    }
+    handleOpenSSHTerminal(id)
+  }
+
+  const onConnectionDragStart = (
+    event: DragEvent,
+    connection: SSHConnection,
+  ) => {
+    draggingConnection.set({
+      kind: EditorResourceKind.SSHConnection,
+      id: connection.id,
+      name: connection.name,
+    })
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'copy'
+      event.dataTransfer.setData('text/plain', connection.id)
+    }
+    dismissFlyoutForDrag()
+  }
+
+  const onConnectionDragEnd = () => {
+    draggingConnection.set(null)
+    flyoutSuppressed = false
   }
 
   const toggleSection = (sectionId: string) => {
@@ -222,41 +347,37 @@
 </script>
 
 <aside
-  class="relative z-200 flex h-full shrink-0 overflow-visible border-r border-border bg-[#0a0a0f] transition-all duration-300 ease-in-out {collapsed
+  class="relative z-200 flex h-full shrink-0 overflow-visible border-r border-sidebar-border bg-sidebar-background transition-all duration-300 ease-in-out {collapsed
     ? 'w-[4.5rem]'
     : 'w-[23rem]'}"
 >
   <nav
-    class="flex w-[4.5rem] shrink-0 flex-col items-center gap-2 border-r border-border bg-[#08080c] px-2 py-4"
-    aria-label="Resource types"
+    class="flex w-[4.5rem] shrink-0 flex-col items-center gap-2 border-r border-sidebar-border bg-sidebar-rail px-2 py-4"
+    aria-label={$translate('sidebar.resourceTypes')}
+    on:mouseenter={openFlyout}
+    on:mouseleave={scheduleFlyoutClose}
   >
-    <div
-      class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-primary/20 bg-primary/15 text-sm font-black text-primary shadow-[0_0_24px_rgba(18,206,144,0.12)]"
-    >
-      V
-    </div>
-
-    {#each railItems as item}
+    {#each railItems as item (item.id)}
       <button
         type="button"
-        class="group relative flex h-11 w-11 items-center justify-center rounded-xl border transition-all duration-150 {activeMode ===
+        class="group relative flex h-11 w-11 items-center justify-center rounded-xl transition-all duration-150 {activeMode ===
         item.id
-          ? 'border-primary/30 bg-primary/12 text-primary shadow-[inset_0_0_0_1px_rgba(18,206,144,0.08)]'
-          : 'border-transparent text-muted-foreground hover:border-border hover:bg-white/5 hover:text-white'}"
+          ? 'bg-primary/12 text-primary'
+          : 'text-muted-foreground hover:bg-white/5 hover:text-white'}"
         aria-label={item.label}
         aria-pressed={activeMode === item.id}
         on:click={() => selectMode(item.id)}
       >
         {#if activeMode === item.id}
           <span
-            class="absolute -left-2 h-6 w-0.5 rounded-r-full bg-primary shadow-[0_0_12px_rgba(18,206,144,0.65)]"
+            class="absolute -left-2 h-6 w-0.5 rounded-r-full bg-primary shadow-[0_0_12px_rgb(var(--color-primary-rgb)_/_0.65)]"
           ></span>
         {/if}
 
         <svelte:component this={item.icon} size={19} strokeWidth={2.1} />
 
         <span
-          class="pointer-events-none absolute left-[3.35rem] z-500 hidden min-w-max rounded-lg border border-border bg-[#101016] px-2.5 py-1.5 text-xs font-medium text-white shadow-xl shadow-black/40 group-hover:block"
+          class="pointer-events-none absolute left-[3.2rem] z-500 hidden min-w-max rounded-lg border border-border bg-sidebar-tooltip px-2.5 py-1.5 text-xs font-medium text-white shadow-xl shadow-black/40 group-hover:block"
         >
           {item.shortLabel}
         </span>
@@ -264,169 +385,179 @@
     {/each}
   </nav>
 
-  {#if !collapsed}
-    <section class="flex min-w-0 flex-1 flex-col bg-[#0a0a0f]">
-      <div class="border-b border-border px-4 py-4">
-        <div class="flex items-start justify-between gap-3">
-          <div class="min-w-0">
-            <p
-              class="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground"
-            >
+  {#snippet panelBody()}
+    <div class="border-b border-border px-4 py-4">
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <p
+            class="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground"
+          >
+            {activeMode === 'api'
+              ? $translate('sidebar.collections')
+              : activeResourcePanel?.eyebrow}
+          </p>
+          <div class="mt-1 flex items-center gap-2">
+            <svelte:component
+              this={activeRailItem.icon}
+              size={17}
+              class="shrink-0 text-primary"
+            />
+            <h2 class="truncate text-sm font-semibold text-white">
               {activeMode === 'api'
-                ? 'Collections'
-                : activeResourcePanel?.eyebrow}
-            </p>
-            <div class="mt-1 flex items-center gap-2">
-              <svelte:component
-                this={activeRailItem.icon}
-                size={17}
-                class="shrink-0 text-primary"
-              />
-              <h2 class="truncate text-sm font-semibold text-white">
-                {activeMode === 'api' ? 'API' : activeResourcePanel?.title}
-              </h2>
-            </div>
-            <p class="mt-1 truncate text-xs text-muted-foreground">
-              {activeRailItem.description}
-            </p>
+                ? $translate('sidebar.rail.api.label')
+                : activeResourcePanel?.title}
+            </h2>
           </div>
-
-          {#if activeMode === 'api'}
-            <div class="relative shrink-0" bind:this={addSectionContainer}>
-              <button
-                type="button"
-                class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-primary/25 bg-primary text-background shadow-[0_10px_28px_rgba(18,206,144,0.18)] transition hover:bg-primary/90"
-                on:click={() => (showAddSectionPanel = !showAddSectionPanel)}
-                aria-label={t('sidebar.addSection')}
-              >
-                <Plus size={16} strokeWidth={2.2} />
-              </button>
-            </div>
-
-            <FloatingDropdown
-              open={showAddSectionPanel}
-              anchorElement={addSectionContainer}
-              placement="bottom-end"
-              offset={8}
-              group="sidebar-add-section"
-              panelClass="rounded-lg border border-border bg-[#11111a] shadow-2xl shadow-black/60 p-2.5"
-              on:close={() => (showAddSectionPanel = false)}
-            >
-              <SidebarAddSection
-                on:addCustom={(event) => addCustomSection(event.detail.label)}
-              />
-            </FloatingDropdown>
-          {/if}
+          <p class="mt-1 truncate text-xs text-muted-foreground">
+            {activeRailItem.description}
+          </p>
         </div>
 
-        {#if activeMode !== 'api'}
-          <label
-            class="mt-4 flex h-10 items-center gap-2 rounded-xl border border-border bg-white/3 px-3 text-muted-foreground transition focus-within:border-primary/35 focus-within:bg-white/5"
-          >
-            <Search size={15} class="shrink-0" />
-            <input
-              bind:value={resourceSearch}
-              class="h-full min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-muted-foreground"
-              placeholder={activeResourcePanel?.searchPlaceholder}
-            />
-          </label>
-        {/if}
-      </div>
-
-      <div class="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-2 py-3">
         {#if activeMode === 'api'}
-          {#if sections.length === 0}
-            <div
-              class="mx-2 rounded-xl border border-dashed border-border bg-white/2 px-4 py-5 text-sm text-muted-foreground"
+          <div class="relative shrink-0" bind:this={addSectionContainer}>
+            <button
+              type="button"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-primary/25 bg-primary text-background shadow-[0_10px_28px_rgb(var(--color-primary-rgb)_/_0.18)] transition hover:bg-primary/90"
+              on:click={() => (showAddSectionPanel = !showAddSectionPanel)}
+              aria-label={$translate('sidebar.addSection')}
             >
-              {t('sidebar.empty')}
-            </div>
-          {/if}
-
-          <div class="space-y-1">
-            {#each sections as section}
-              <SidebarSection
-                {section}
-                collapsed={false}
-                expanded={expanded.includes(section.id)}
-                icon={getSectionIcon(section.kind)}
-                {getMethodBadgeStyle}
-                on:toggle={() => toggleSection(section.id)}
-                on:removeSection={(event) =>
-                  removeSection(event.detail.sectionId)}
-                on:renameSection={renameSection}
-                on:addItem={addSectionItem}
-                on:renameItem={renameSectionItem}
-                on:reorderItem={reorderSectionItem}
-                on:moveItem={moveSectionItem}
-                on:removeItem={removeSectionItem}
-              />
-            {/each}
+              <Plus size={16} strokeWidth={2.2} />
+            </button>
           </div>
-        {:else if activeResourcePanel}
-          {#if filteredResourceItems.length === 0}
-            <div
-              class="mx-2 rounded-xl border border-border bg-white/2 px-4 py-5 text-sm text-muted-foreground"
-            >
-              {activeResourcePanel.empty}
-            </div>
-          {/if}
 
-          <div class="space-y-1.5">
-            {#each filteredResourceItems as item, index}
-              <button
-                type="button"
-                class="group relative w-full rounded-xl border px-3 py-3 text-left transition-all duration-150 {index ===
-                0
-                  ? 'border-primary/30 bg-primary/10 shadow-[inset_0_0_0_1px_rgba(18,206,144,0.04)]'
-                  : 'border-transparent bg-transparent hover:border-border hover:bg-white/4'}"
-              >
-                {#if index === 0}
-                  <span
-                    class="absolute left-0 top-3 bottom-3 w-0.5 rounded-r-full bg-primary"
-                  ></span>
-                {/if}
-
-                <div class="flex min-w-0 items-center gap-3">
-                  <span
-                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-white/5 text-primary/90 transition group-hover:border-primary/25 group-hover:bg-primary/10"
-                  >
-                    <svelte:component
-                      this={item.icon}
-                      size={18}
-                      strokeWidth={2}
-                    />
-                  </span>
-
-                  <span class="min-w-0 flex-1">
-                    <span
-                      class="flex min-w-0 items-center gap-2 text-sm font-semibold text-white"
-                    >
-                      <span class="truncate">{item.name}</span>
-                      {#if item.badge}
-                        <span
-                          class="shrink-0 rounded-full border border-border bg-white/5 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
-                        >
-                          {item.badge}
-                        </span>
-                      {/if}
-                    </span>
-                    <span
-                      class="mt-1 flex min-w-0 items-center gap-2 text-xs text-muted-foreground"
-                    >
-                      <span class="truncate">{item.meta}</span>
-                      <span
-                        class="h-1 w-1 shrink-0 rounded-full bg-muted-foreground/40"
-                      ></span>
-                      <span class="truncate">{item.detail}</span>
-                    </span>
-                  </span>
-                </div>
-              </button>
-            {/each}
-          </div>
+          <FloatingDropdown
+            open={showAddSectionPanel}
+            anchorElement={addSectionContainer}
+            placement="bottom-end"
+            offset={8}
+            group="sidebar-add-section"
+            panelClass="rounded-lg border border-border bg-sidebar-popover shadow-2xl shadow-black/60 p-2.5"
+            on:close={() => (showAddSectionPanel = false)}
+          >
+            <SidebarAddSection
+              on:addCustom={(event) => addCustomSection(event.detail.label)}
+            />
+          </FloatingDropdown>
+        {:else if activeMode === 'ssh'}
+          <button
+            type="button"
+            class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-primary/25 bg-primary text-background shadow-[0_10px_28px_rgb(var(--color-primary-rgb)_/_0.18)] transition hover:bg-primary/90"
+            aria-label="Create SSH connection"
+            on:click={handleCreateSSHConnection}
+          >
+            <Plus size={16} strokeWidth={2.2} />
+          </button>
         {/if}
       </div>
+
+      {#if activeMode !== 'api'}
+        <label
+          class="mt-4 flex h-10 items-center gap-2 rounded-xl bg-white/4 px-3 text-muted-foreground transition focus-within:bg-white/6 focus-within:ring-1 focus-within:ring-primary/30"
+        >
+          <Search size={15} class="shrink-0" />
+          <input
+            bind:value={resourceSearch}
+            class="h-full min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-muted-foreground"
+            placeholder={activeResourcePanel?.searchPlaceholder}
+          />
+        </label>
+      {/if}
+    </div>
+
+    <div class="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-2 py-3">
+      {#if activeMode === 'api'}
+        {#if sections.length === 0}
+          <div
+            class="mx-2 rounded-xl bg-white/2 px-4 py-6 text-center text-sm text-muted-foreground"
+          >
+            {$translate('sidebar.empty')}
+          </div>
+        {/if}
+
+        <div class="space-y-1">
+          {#each sections as section (section.id)}
+            <SidebarSection
+              {section}
+              collapsed={false}
+              expanded={expanded.includes(section.id)}
+              icon={getSectionIcon(section.kind)}
+              {getMethodBadgeStyle}
+              on:toggle={() => toggleSection(section.id)}
+              on:removeSection={(event) =>
+                removeSection(event.detail.sectionId)}
+              on:renameSection={renameSection}
+              on:addItem={addSectionItem}
+              on:renameItem={renameSectionItem}
+              on:reorderItem={reorderSectionItem}
+              on:moveItem={moveSectionItem}
+              on:removeItem={removeSectionItem}
+            />
+          {/each}
+        </div>
+      {:else if activeMode === 'ssh'}
+        {#if !hasSSHMatches && !normalizedResourceSearch}
+          <div
+            class="mx-2 rounded-xl bg-white/2 px-4 py-6 text-center text-sm text-muted-foreground"
+          >
+            {activeResourcePanel?.empty}
+          </div>
+        {/if}
+
+        {#if !hasSSHMatches && normalizedResourceSearch}
+          <div
+            class="mx-2 rounded-xl bg-white/2 px-4 py-6 text-center text-sm text-muted-foreground"
+          >
+            No SSH connections match your search.
+          </div>
+        {/if}
+
+        <div class="space-y-1.5">
+          {#each sshConnectionList as connection (connection.id)}
+            {@const isActive = $selectedSSHConnectionId === connection.id}
+            <button
+              type="button"
+              draggable="true"
+              class="group relative w-full rounded-lg px-3 py-3 text-left transition-all duration-150 {isActive
+                ? 'bg-primary/10'
+                : 'bg-transparent hover:bg-white/4'}"
+              on:click={() => onConnectionClick(connection.id)}
+              on:dblclick={() => onConnectionDblClick(connection.id)}
+              on:dragstart={(event) => onConnectionDragStart(event, connection)}
+              on:dragend={onConnectionDragEnd}
+            >
+              <ConnectionRow {connection} active={isActive} />
+            </button>
+          {/each}
+        </div>
+      {:else if activeResourcePanel}
+        <div
+          class="mx-2 rounded-xl bg-white/2 px-4 py-6 text-center text-sm text-muted-foreground"
+        >
+          {activeResourcePanel.empty}
+        </div>
+      {/if}
+    </div>
+  {/snippet}
+
+  {#if !collapsed}
+    <section class="flex min-w-0 flex-1 flex-col bg-sidebar-panel">
+      {@render panelBody()}
     </section>
+  {/if}
+
+  {#if collapsed && flyoutOpen}
+    <div
+      role="presentation"
+      on:mouseenter={openFlyout}
+      on:mouseleave={scheduleFlyoutClose}
+      transition:fly={{ x: -16, duration: 200, easing: cubicOut }}
+      class="absolute left-[4.5rem] top-3 z-500 flex h-[calc(100%-4.5rem)] w-[min(21rem,calc(100vw-6rem))] flex-col overflow-hidden rounded-r-2xl border border-l-0 border-sidebar-border bg-sidebar-panel shadow-[0_30px_80px_-12px_rgba(0,0,0,0.85)]"
+    >
+      <section
+        class="flex min-w-0 flex-1 flex-col overflow-hidden bg-sidebar-panel"
+      >
+        {@render panelBody()}
+      </section>
+    </div>
   {/if}
 </aside>

@@ -1,32 +1,57 @@
 version: "2"
 
 formatters:
+  default: none
   enable:
     - gofmt
     - goimports
 
 linters:
+  default: none
   enable:
+    - bodyclose
+    - durationcheck
     - govet
     - errcheck
+    - errorlint
+    - exhaustive
     - staticcheck
     - ineffassign
     - misspell
     - gocritic
+    - gosec
+    - nilerr
+    - noctx
+    - rowserrcheck
+    - sqlclosecheck
+    - unconvert
+    - unused
+    - wastedassign
   settings:
     gocritic:
       enabled-tags:
+        - diagnostic
         - performance
         - style
+      disabled-checks:
+        - builtinShadow
+        - hugeParam
+        - paramTypeCombine
+        - rangeValCopy
+        - unnamedResult
   exclusions:
     rules:
       - path: "main.go"
         linters:
           - all
+      - path: "_test.go"
+        linters:
+          - gosec
 
 issues:
-  max-issues-per-linter: 50
-  max-same-issues: 5
+  max-issues-per-linter: 0
+  max-same-issues: 0
 
 run:
   timeout: 5m
+  tests: true

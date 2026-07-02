@@ -47,3 +47,19 @@ func (s *Service) ClearTokens() error {
 
 	return nil
 }
+
+func (s *Service) SetSecret(name, value string) error {
+	return keyring.Set(service, name, value)
+}
+
+func (s *Service) GetSecret(name string) (string, error) {
+	return keyring.Get(service, name)
+}
+
+func (s *Service) DeleteSecret(name string) error {
+	return keyring.Delete(service, name)
+}
+
+func ErrNotFound() error {
+	return keyring.ErrNotFound
+}

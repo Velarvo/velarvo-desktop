@@ -15,9 +15,18 @@ RUN npm install -g pnpm
 
 ENV PATH=$PATH:/go/bin
 
+# Run the build as a non-root user (Trivy DS-0002). System setup above needs
+# root; from here on we drop privileges. The user owns /app and /go so pnpm
+# install, the wails binary in /go/bin and the Go build caches stay writable.
+RUN useradd --create-home --shell /bin/bash appuser \
+    && mkdir -p /app \
+    && chown -R appuser:appuser /app /go
+
 WORKDIR /app
 
-COPY .. .
+COPY --chown=appuser:appuser .. .
+
+USER appuser
 
 RUN pnpm install
 

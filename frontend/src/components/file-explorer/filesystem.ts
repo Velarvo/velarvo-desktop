@@ -1,5 +1,7 @@
 import { GetHomeDirectory, ListDirectory } from '../../../wailsjs/go/app/App'
 import type { app } from '../../../wailsjs/go/models'
+import { getResponseMessage } from '@/lib/errors'
+import { t } from '@/lib/i18n'
 import type {
   ExplorerColumn,
   ExplorerDataSource,
@@ -36,19 +38,32 @@ const mapExplorerNode = (node: app.ExplorerNode): ExplorerNode => ({
 export const fileSystemExplorerDataSource: ExplorerDataSource = {
   async getInitialPath() {
     if (!isWailsRuntimeAvailable()) {
-      throw new Error('Wails runtime is not available')
+      throw new Error(t('errors.FILESYSTEM_UNAVAILABLE'))
     }
 
-    return GetHomeDirectory()
+    const resp = await GetHomeDirectory()
+    if (!resp.success || !resp.data) {
+      throw new Error(
+        getResponseMessage(resp, t('errors.FILESYSTEM_READ_HOME_FAILED')),
+      )
+    }
+
+    return resp.data
   },
 
   async loadNodes(path: string) {
     if (!isWailsRuntimeAvailable()) {
-      throw new Error('Wails runtime is not available')
+      throw new Error(t('errors.FILESYSTEM_UNAVAILABLE'))
     }
 
-    const nodes = await ListDirectory(path)
-    return nodes.map(mapExplorerNode)
+    const resp = await ListDirectory(path)
+    if (!resp.success || !resp.data) {
+      throw new Error(
+        getResponseMessage(resp, t('errors.FILESYSTEM_LIST_DIRECTORY_FAILED')),
+      )
+    }
+
+    return resp.data.map(mapExplorerNode)
   },
 
   normalizePath,
@@ -58,10 +73,10 @@ export const fileSystemExplorerDataSource: ExplorerDataSource = {
   isHidden: (node) => isHiddenFile(node.name),
 }
 
-export const fileSystemExplorerColumns: ExplorerColumn[] = [
+export const getFileSystemExplorerColumns = (): ExplorerColumn[] => [
   {
     id: 'type',
-    label: 'Type',
+    label: t('explorer.columns.type'),
     widthClass: 'w-28',
     hideBelow: 'lg',
     render: (node) => node.type ?? '—',
@@ -69,7 +84,7 @@ export const fileSystemExplorerColumns: ExplorerColumn[] = [
   },
   {
     id: 'size',
-    label: 'Size',
+    label: t('explorer.columns.size'),
     widthClass: 'w-32',
     cellClass: 'tabular-nums',
     hideBelow: 'md',
@@ -78,7 +93,7 @@ export const fileSystemExplorerColumns: ExplorerColumn[] = [
   },
   {
     id: 'modified',
-    label: 'Modified',
+    label: t('explorer.columns.modified'),
     widthClass: 'w-40',
     hideBelow: 'sm',
     render: (node) => (node.modified ? formatDate(node.modified) : '—'),
@@ -86,12 +101,19 @@ export const fileSystemExplorerColumns: ExplorerColumn[] = [
   },
 ]
 
-export const fileSystemExplorerLabels: Partial<ExplorerLabels> = {
-  searchPlaceholder: 'Search files...',
-  loading: 'Loading files...',
-  empty: 'No files found',
-  openContainer: 'Open folder',
-  showHidden: 'Show hidden files',
-  hideHidden: 'Hide hidden files',
-  copyCurrentPath: 'Copy current path',
-}
+export const getFileSystemExplorerLabels = (): Partial<ExplorerLabels> => ({
+  nameColumn: t('explorer.columns.name'),
+  searchPlaceholder: t('explorer.searchPlaceholder'),
+  sortBy: t('explorer.sortBy'),
+  ascending: t('explorer.ascending'),
+  descending: t('explorer.descending'),
+  hidden: t('explorer.hidden'),
+  loading: t('explorer.loading'),
+  empty: t('explorer.empty'),
+  openContainer: t('explorer.openContainer'),
+  showHidden: t('explorer.showHidden'),
+  hideHidden: t('explorer.hideHidden'),
+  copy: t('explorer.copy'),
+  copied: t('explorer.copied'),
+  copyCurrentPath: t('explorer.copyCurrentPath'),
+})

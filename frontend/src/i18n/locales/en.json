@@ -69,12 +69,14 @@
     },
     "unlock": {
       "title": "Unlock vault",
-      "pin": "Enter PIN",
       "masterPassword": "Master password",
-      "useMaster": "Use master password instead",
-      "biometric": "Use Touch ID",
-      "submit": "Unlock",
-      "submitting": "Unlocking..."
+      "subtitle": "Enter your master password to decrypt the local vault key for this session.",
+      "passwordPlaceholder": "Enter your master password",
+      "submit": "Unlock vault",
+      "submitting": "Unlocking...",
+      "validation": {
+        "passwordRequired": "Master password is required."
+      }
     },
     "masterPassword": {
       "title": "Set up master password",
@@ -114,7 +116,61 @@
     "PIN_ATTEMPTS_EXCEEDED": "Too many attempts, use master password",
     "VAULT_LOCKED": "Vault is locked",
     "CLIENT_ERROR": "An unexpected error occurred",
-    "UNKNOWN": "An unexpected error occurred, please try again"
+    "SERVICE_UNAVAILABLE": "Service is currently unavailable",
+    "VAULT_NOT_INITIALIZED": "Vault is not initialized",
+    "VAULT_NOT_SETUP": "Vault is not set up yet",
+    "VAULT_ALREADY_SETUP": "Vault is already set up",
+    "INVALID_MASTER_PASSWORD": "Incorrect master password",
+    "WEAK_MASTER_PASSWORD": "Master password is too weak",
+    "VAULT_UNSUPPORTED_STATE": "Vault is in an unsupported state",
+    "VAULT_READ_STATE_FAILED": "Failed to read vault state",
+    "VAULT_SETUP_FAILED": "Failed to create vault",
+    "VAULT_UNLOCK_FAILED": "Failed to unlock vault",
+    "VAULT_LOCK_FAILED": "Failed to lock vault",
+    "PROJECTS_NOT_INITIALIZED": "Projects are not initialized",
+    "PROJECT_NOT_FOUND": "Project not found",
+    "PROJECT_DUPLICATE_NAME": "Project name already exists",
+    "PROJECT_INVALID_INPUT": "Invalid project input",
+    "PROJECT_ICON_NOT_FOUND": "Project icon not found",
+    "PROJECT_CIPHER_NOT_READY": "Project cipher is not configured",
+    "PROJECT_LIST_FAILED": "Failed to load projects",
+    "PROJECT_READ_FAILED": "Failed to load project",
+    "PROJECT_CREATE_FAILED": "Failed to create project",
+    "PROJECT_UPDATE_FAILED": "Failed to update project",
+    "PROJECT_DELETE_FAILED": "Failed to delete project",
+    "PROJECT_ICON_SET_FAILED": "Failed to save project icon",
+    "PROJECT_ICON_READ_FAILED": "Failed to load project icon",
+    "PROJECT_ICON_DELETE_FAILED": "Failed to delete project icon",
+    "WORKSPACES_NOT_INITIALIZED": "Workspaces are not initialized",
+    "WORKSPACE_NOT_FOUND": "Workspace not found",
+    "WORKSPACE_PROJECT_MISSING": "Workspace project not found",
+    "WORKSPACE_DUPLICATE_NAME": "Workspace name already exists in this project",
+    "WORKSPACE_INVALID_INPUT": "Invalid workspace input",
+    "WORKSPACE_CIPHER_NOT_READY": "Workspace cipher is not configured",
+    "WORKSPACE_LIST_FAILED": "Failed to load workspaces",
+    "WORKSPACE_READ_FAILED": "Failed to load workspace",
+    "WORKSPACE_CREATE_FAILED": "Failed to create workspace",
+    "WORKSPACE_UPDATE_FAILED": "Failed to update workspace",
+    "WORKSPACE_DELETE_FAILED": "Failed to delete workspace",
+    "FILESYSTEM_HOME_NOT_FOUND": "Home directory not found",
+    "FILESYSTEM_PATH_NOT_FOUND": "Path not found",
+    "FILESYSTEM_ACCESS_DENIED": "Access to this path was denied",
+    "FILESYSTEM_UNAVAILABLE": "File explorer is unavailable",
+    "FILESYSTEM_READ_HOME_FAILED": "Failed to read home directory",
+    "FILESYSTEM_LIST_DIRECTORY_FAILED": "Failed to read directory",
+    "UNKNOWN": "An unexpected error occurred, please try again",
+    "SSH_NOT_INITIALIZED": "SSH service is not ready.",
+    "SSH_NOT_FOUND": "SSH connection not found.",
+    "SSH_INVALID_INPUT": "Please fill in the required connection fields.",
+    "SSH_NO_PASSWORD": "This connection has no stored password.",
+    "SSH_LIST_FAILED": "Failed to load SSH connections.",
+    "SSH_CREATE_FAILED": "Failed to save the SSH connection.",
+    "SSH_UPDATE_FAILED": "Failed to update the SSH connection.",
+    "SSH_DELETE_FAILED": "Failed to delete the SSH connection.",
+    "SSH_CONNECT_FAILED": "Could not connect to the host. Check the address and credentials.",
+    "SSH_DISCONNECT_FAILED": "Failed to disconnect.",
+    "SSH_NOT_CONNECTED": "The connection is not active. Connect first.",
+    "SSH_TERMINAL_FAILED": "The terminal session failed."
   },
   "validation": {
     "emailRequired": "Email is required",
@@ -125,7 +181,8 @@
     "lastNameRequired": "Last name is required",
     "confirmPasswordRequired": "Please confirm your password",
     "passwordsMismatch": "Passwords do not match",
-    "acceptTermsRequired": "You must accept the terms"
+    "acceptTermsRequired": "You must accept the terms",
+    "unknown": "Invalid value"
   },
   "common": {
     "save": "Save",
@@ -134,15 +191,147 @@
     "continue": "Continue",
     "loading": "Loading...",
     "e2eEncrypted": "End-to-end encrypted vault",
-    "and": "and"
+    "and": "and",
+    "close": "Close",
+    "active": "Active",
+    "locked": "Locked",
+    "unlocked": "Unlocked",
+    "off": "Off"
+  },
+  "authLayout": {
+    "heroLine1": "Desktop tools for",
+    "heroLine2": "databases, APIs,",
+    "heroLine3Prefix": "and ",
+    "heroLine3Accent": "infrastructure",
+    "description": "Use one app for database access, API requests, SSH sessions, and local connections."
   },
   "settings": {
+    "title": "Settings",
+    "subtitle": "Manage security, preferences and local vault behavior.",
     "language": "Language",
-    "theme": "Theme"
+    "theme": "Theme",
+    "navTitle": "Settings",
+    "security": {
+      "nav": "Security",
+      "title": "Security Settings",
+      "subtitle": "Manage session protection and your master password flow.",
+      "close": "Close security settings",
+      "vault": "Vault",
+      "autoLock": "Auto-lock",
+      "lockVault": "Lock vault",
+      "locking": "Locking...",
+      "masterPasswordTitle": "Master Password Unlock",
+      "masterPasswordDescription": "Your vault is currently protected only by the master password. Additional unlock methods can be added later once the local security model is finalized.",
+      "activeMethod": "Active method",
+      "activeMethodDescription": "Master password is required to unlock the local vault and decrypt encrypted project data for the current session."
+    },
+    "preferences": {
+      "nav": "Preferences",
+      "title": "Preferences",
+      "subtitle": "Tune the interface defaults for this device.",
+      "languageTitle": "App language",
+      "languageDescription": "Choose the interface language for this device. Changes apply immediately.",
+      "notifications": "Notifications",
+      "notificationsDescription": "Notification controls will appear here once desktop alerts are wired in."
+    }
+  },
+  "projects": {
+    "create": {
+      "badge": "New Project",
+      "title": "Create a new project",
+      "subtitle": "Create a new project to manage connections.",
+      "name": "Project Name",
+      "namePlaceholder": "Project name",
+      "icon": "Project Image",
+      "iconHint": "Upload a square icon or image.",
+      "chooseIcon": "Choose image",
+      "removeIcon": "Remove project image",
+      "preparingIcon": "Preparing image...",
+      "iconUnsupported": "Choose a PNG, JPG or WebP image.",
+      "iconTooLarge": "This image is still too large after resizing.",
+      "iconCanvasError": "Image processing is not available.",
+      "iconFailed": "Project image could not be prepared.",
+      "preview": "Preview",
+      "previewFallback": "New Project",
+      "previewMeta": "Local vault project",
+      "create": "Create project",
+      "creating": "Creating project...",
+      "close": "Close create project modal",
+      "validation": {
+        "nameRequired": "Project name is required."
+      }
+    }
+  },
+  "workspaces": {
+    "create": {
+      "title": "Create a workspace",
+      "subtitle": "Workspaces group environments inside a project, like production, staging or local.",
+      "projectContext": "Project:",
+      "name": "Workspace Name",
+      "namePlaceholder": "Workspace name",
+      "color": "Accent color",
+      "preview": "Preview",
+      "previewFallback": "New Workspace",
+      "previewMeta": "Workspace inside the selected project",
+      "create": "Create workspace",
+      "creating": "Creating workspace...",
+      "close": "Close create workspace modal",
+      "validation": {
+        "nameRequired": "Workspace name is required.",
+        "projectRequired": "Select a project before creating a workspace."
+      }
+    }
+  },
+  "topbar": {
+    "projectsFallback": "Projects",
+    "projectSwitcherTitle": "Project Switcher",
+    "projectSwitcherSubtitle": "Choose your active vault project",
+    "createProject": "Create project",
+    "projectsLoading": "Loading projects...",
+    "projectsEmpty": "No projects yet. Create your first one to start organizing your vault.",
+    "addProject": "Add Project",
+    "workspaceFallback": "Workspace",
+    "workspaceSwitcherTitle": "Workspace Switcher",
+    "workspaceSwitcherSubtitle": "Select a project first to see workspaces",
+    "workspaceNoProject": "Select a project to manage its workspaces.",
+    "workspacesLoading": "Loading workspaces...",
+    "workspacesEmpty": "No workspaces yet for this project. Create the first one to get started.",
+    "createWorkspace": "Create workspace",
+    "addWorkspace": "Add Workspace",
+    "search": "Search...",
+    "openSecuritySettings": "Open security settings",
+    "profile": "Profile",
+    "signOut": "Sign out"
+  },
+  "explorer": {
+    "columns": {
+      "name": "Name",
+      "type": "Type",
+      "size": "Size",
+      "modified": "Modified"
+    },
+    "searchPlaceholder": "Search files...",
+    "sortBy": "Sort by",
+    "ascending": "Ascending order",
+    "descending": "Descending order",
+    "hidden": "Hidden",
+    "loading": "Loading files...",
+    "empty": "No files found",
+    "openContainer": "Open folder",
+    "showHidden": "Show hidden files",
+    "hideHidden": "Hide hidden files",
+    "copy": "Copy",
+    "copied": "Copied",
+    "dataSourceMissing": "Explorer data source is not configured",
+    "loadFailed": "Failed to load items",
+    "initFailed": "Failed to initialize explorer",
+    "copyCurrentPath": "Copy current path"
   },
   "sidebar": {
     "empty": "You don't have any sections yet. Add your first custom section below.",
     "addSection": "Add section",
+    "resourceTypes": "Resource types",
+    "collections": "Collections",
     "sectionNamePlaceholder": "Section name",
     "blockNamePlaceholder": "Block name",
     "newBlockName": "New block",
@@ -164,11 +353,72 @@
       "graphql": "GraphQL",
       "ssh": "SSH"
     },
+    "rail": {
+      "ssh": {
+        "label": "SSH",
+        "shortLabel": "SSH",
+        "description": "Servers and terminal access"
+      },
+      "ftp": {
+        "label": "File Transfer",
+        "shortLabel": "FTP",
+        "description": "FTP, FTPS and SFTP endpoints"
+      },
+      "databases": {
+        "label": "Databases",
+        "shortLabel": "DB",
+        "description": "Database connections"
+      },
+      "api": {
+        "label": "API",
+        "shortLabel": "API",
+        "description": "Collections and requests"
+      }
+    },
+    "panels": {
+      "ssh": {
+        "eyebrow": "Access",
+        "title": "SSH Connections",
+        "searchPlaceholder": "Search SSH hosts...",
+        "empty": "No SSH connections yet."
+      },
+      "ftp": {
+        "eyebrow": "Transfer",
+        "title": "File Transfer Endpoints",
+        "searchPlaceholder": "Search FTP endpoints...",
+        "empty": "No file transfer endpoints yet."
+      },
+      "databases": {
+        "eyebrow": "Data",
+        "title": "Databases",
+        "searchPlaceholder": "Search connections...",
+        "empty": "No database connections yet."
+      }
+    },
     "addSectionPanel": {
       "title": "Add section",
       "customSection": "Custom section",
       "customSectionPlaceholder": "e.g. Messaging",
       "add": "Add"
     }
+  },
+  "ssh": {
+    "password": "Password",
+    "passwordPlaceholder": "Connection password",
+    "passwordStored": "•••••••• (stored)",
+    "passwordEditHint": "Leave blank to keep the current password.",
+    "clearPassword": "Remove stored password",
+    "passwordSet": "Set",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "saveAndConnect": "Save & connect",
+    "connected": "Connected",
+    "strictHostKeyHint": "Verifies the host key on first connect and rejects changes.",
+    "terminal": "Terminal",
+    "connecting": "Connecting…",
+    "closed": "Closed",
+    "connectionError": "Connection error",
+    "reconnect": "Reconnect",
+    "terminalFailed": "Could not open the terminal."
   }
 }

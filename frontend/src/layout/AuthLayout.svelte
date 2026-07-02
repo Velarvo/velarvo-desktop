@@ -1,13 +1,13 @@
 <script lang="ts">
   import logoUrl from '@/assets/logos/main.png'
-  import { t } from '@/lib/i18n'
+  import { translate } from '@/lib/i18n'
 </script>
 
 <div class="min-h-screen w-full flex bg-background select-none overflow-hidden">
   <div class="drag-region w-full absolute top-0 h-10 z-50"></div>
 
   <div
-    class="hidden lg:flex lg:w-[45%] xl:w-[55%] relative flex-col justify-between overflow-hidden bg-[#0a0a0f] border-r border-border p-10 xl:p-14"
+    class="hidden lg:flex lg:w-[45%] xl:w-[55%] relative flex-col justify-between overflow-hidden bg-surface-base border-r border-border p-10 xl:p-14"
   >
     <div class="pointer-events-none absolute inset-0">
       <div
@@ -27,15 +27,17 @@
       <h1
         class="text-4xl xl:text-5xl font-bold leading-tight tracking-tight text-white"
       >
-        Desktop tools for
+        {$translate('authLayout.heroLine1')}
         <br />
-        <span class="text-primary">databases, APIs,</span>
+        <span class="text-primary">{$translate('authLayout.heroLine2')}</span>
         <br />
-        and <span class="text-primary">infrastructure</span>
+        {$translate('authLayout.heroLine3Prefix')}
+        <span class="text-primary"
+          >{$translate('authLayout.heroLine3Accent')}</span
+        >
       </h1>
       <p class="max-w-sm text-base text-muted-foreground leading-relaxed">
-        Use one app for database access, API requests, SSH sessions, and local
-        connections.
+        {$translate('authLayout.description')}
       </p>
     </div>
   </div>
@@ -60,7 +62,7 @@
 
     <div class="w-full max-w-[500px]"><slot /></div>
     <p class="mt-6 text-center text-[11px] text-muted-foreground/60">
-      {t('common.e2eEncrypted')}
+      {$translate('common.e2eEncrypted')}
     </p>
   </div>
 </div>

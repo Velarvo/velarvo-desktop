@@ -62,6 +62,9 @@ func main() {
 		OnStartup: func(ctx context.Context) {
 			a.Startup(ctx)
 		},
+		OnShutdown: func(ctx context.Context) {
+			a.OnShutdown(ctx)
+		},
 		OnDomReady: func(ctx context.Context) {
 			a.OnDomReady(ctx)
 			setupTrafficLights()
