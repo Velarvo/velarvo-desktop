@@ -7,7 +7,16 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/Velarvo/velarvo-desktop/internal/apperrors"
+	"github.com/Velarvo/velarvo-desktop/internal/logger"
+	"github.com/Velarvo/velarvo-desktop/internal/types"
+	"go.uber.org/zap"
 )
+
+func filesystemLog() *zap.SugaredLogger {
+	return logger.Named("filesystem")
+}
 
 type ExplorerNode struct {
 	ID       string `json:"id"`
@@ -18,23 +27,25 @@ type ExplorerNode struct {
 	Modified int64  `json:"modified"`
 }
 
-func (a *App) GetHomeDirectory() (string, error) {
+func getHomeDirectory() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
+		filesystemLog().Errorw("failed to resolve home directory", "error", err)
 		return "", err
 	}
 
 	if home == "" {
-		return "", errors.New("home directory not found")
+		filesystemLog().Warn("home directory resolved to empty path")
+		return "", ErrHomeDirectoryNotFound
 	}
 
 	return filepath.Clean(home), nil
 }
 
-func (a *App) ListDirectory(path string) ([]ExplorerNode, error) {
+func listDirectory(path string) ([]ExplorerNode, error) {
 	target := strings.TrimSpace(path)
 	if target == "" {
-		home, err := a.GetHomeDirectory()
+		home, err := getHomeDirectory()
 		if err != nil {
 			return nil, err
 		}
@@ -44,6 +55,7 @@ func (a *App) ListDirectory(path string) ([]ExplorerNode, error) {
 	cleanPath := filepath.Clean(target)
 	entries, err := os.ReadDir(cleanPath)
 	if err != nil {
+		filesystemLog().Errorw("failed to list directory", "path", cleanPath, "error", err)
 		return nil, err
 	}
 
@@ -54,6 +66,7 @@ func (a *App) ListDirectory(path string) ([]ExplorerNode, error) {
 
 		info, infoErr := entry.Info()
 		if infoErr != nil {
+			filesystemLog().Warnw("failed to read file info, skipping entry", "path", entryPath, "error", infoErr)
 			continue
 		}
 
@@ -89,5 +102,26 @@ func (a *App) ListDirectory(path string) ([]ExplorerNode, error) {
 		return strings.ToLower(nodes[i].Name) < strings.ToLower(nodes[j].Name)
 	})
 
+	filesystemLog().Debugw("directory listed", "path", cleanPath, "entries", len(nodes))
 	return nodes, nil
+}
+
+func (a *App) GetHomeDirectory() types.APIResponse[string] {
+	home, err := getHomeDirectory()
+	if err != nil {
+		code := string(apperrors.CodeFilesystemReadHomeFailed)
+		if errors.Is(err, ErrHomeDirectoryNotFound) {
+			code = string(apperrors.CodeFilesystemHomeNotFound)
+		}
+		return errResponse[string](code, "", err)
+	}
+	return successResponse(string(apperrors.CodeOK), "", home)
+}
+
+func (a *App) ListDirectory(path string) types.APIResponse[[]ExplorerNode] {
+	nodes, err := listDirectory(path)
+	if err != nil {
+		return errResponse[[]ExplorerNode](string(apperrors.CodeFilesystemListDirectoryFailed), "", err)
+	}
+	return successResponse(string(apperrors.CodeOK), "", nodes)
 }

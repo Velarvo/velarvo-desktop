@@ -16,7 +16,6 @@
     ArrowDown,
   } from 'lucide-svelte'
   import {
-    DEFAULT_EXPLORER_LABELS,
     type ExplorerColumn,
     type ExplorerColumnBreakpoint,
     type ExplorerDataSource,
@@ -25,8 +24,10 @@
     type SortOrder,
   } from './types'
   import FileIcon from './FileIcon.svelte'
+  import { getFileIconDescriptor } from './fileIcons'
   import { getBreadcrumbs, getParentPath, normalizePath } from './utils'
   import { createSmartCache } from './hooks/useSmartCache'
+  import { translate } from '@/lib/i18n'
 
   type NavigationOptions = {
     preserveHistory?: boolean
@@ -46,6 +47,7 @@
     staleTtl: 120000,
     clone: cloneExplorerNodes,
   })
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity
   const pendingLoads = new Map<string, Promise<ExplorerNode[]>>()
   const dispatch = createEventDispatcher<{
     activate: { node: ExplorerNode; navigated: boolean }
@@ -140,6 +142,23 @@
     return column.hideBelow ? HIDE_BELOW_CLASS[column.hideBelow] : ''
   }
 
+  const buildMetadataLine = (node: ExplorerNode) => {
+    const parts: string[] = []
+    for (const column of columns) {
+      const value = column.render(node)
+      if (value === null || value === undefined) continue
+      const text = String(value).trim()
+      if (!text) continue
+      parts.push(text)
+    }
+    return parts.join(' · ')
+  }
+
+  const getCardIconStyle = (node: ExplorerNode) => {
+    const descriptor = getFileIconDescriptor(node.name, isContainerNode(node))
+    return `background-color: ${descriptor.background}; border-color: ${descriptor.border};`
+  }
+
   const getSortValue = (node: ExplorerNode, field: string) => {
     if (field === 'name') {
       return node.name
@@ -197,7 +216,7 @@
     forceRefresh = false,
   ) => {
     if (!dataSource) {
-      throw new Error('Explorer data source is not configured')
+      throw new Error($translate('explorer.dataSourceMissing'))
     }
 
     if (!forceRefresh) {
@@ -298,7 +317,9 @@
       }
 
       const resolvedError =
-        error instanceof Error ? error : new Error('Failed to load items')
+        error instanceof Error
+          ? error
+          : new Error($translate('explorer.loadFailed'))
       errorMessage = resolvedError.message
       if (!hasVisibleData) {
         nodes = []
@@ -314,7 +335,7 @@
 
   const bootstrap = async () => {
     if (!dataSource) {
-      errorMessage = 'Explorer data source is not configured'
+      errorMessage = $translate('explorer.dataSourceMissing')
       nodes = []
       isLoading = false
       isRefreshing = false
@@ -349,7 +370,7 @@
       const resolvedError =
         error instanceof Error
           ? error
-          : new Error('Failed to initialize explorer')
+          : new Error($translate('explorer.initFailed'))
       errorMessage = resolvedError.message
       nodes = []
       dispatch('error', { path: initialPath, error: resolvedError })
@@ -464,7 +485,23 @@
     }
   }
 
-  $: mergedLabels = { ...DEFAULT_EXPLORER_LABELS, ...labels }
+  $: defaultExplorerLabels = {
+    nameColumn: $translate('explorer.columns.name'),
+    searchPlaceholder: $translate('explorer.searchPlaceholder'),
+    sortBy: $translate('explorer.sortBy'),
+    ascending: $translate('explorer.ascending'),
+    descending: $translate('explorer.descending'),
+    hidden: $translate('explorer.hidden'),
+    showHidden: $translate('explorer.showHidden'),
+    hideHidden: $translate('explorer.hideHidden'),
+    copy: $translate('explorer.copy'),
+    copied: $translate('explorer.copied'),
+    copyCurrentPath: $translate('explorer.copyCurrentPath'),
+    loading: $translate('explorer.loading'),
+    empty: $translate('explorer.empty'),
+    openContainer: $translate('explorer.openContainer'),
+  }
+  $: mergedLabels = { ...defaultExplorerLabels, ...labels }
   $: canGoBack = historyIndex > 0
   $: canGoForward = historyIndex >= 0 && historyIndex < history.length - 1
   $: sortOptions = [
@@ -581,7 +618,7 @@
         on:change={handleSortByChange}
         title={mergedLabels.sortBy}
       >
-        {#each sortOptions as option}
+        {#each sortOptions as option (option.id)}
           <option value={option.id}>{option.label}</option>
         {/each}
       </select>
@@ -632,7 +669,7 @@
   >
     <div class="min-w-0 flex-1 overflow-x-auto">
       <div class="flex items-center gap-1 whitespace-nowrap">
-        {#each breadcrumbs as crumb, index}
+        {#each breadcrumbs as crumb, index (crumb.path)}
           {#if index > 0}
             <ChevronRight
               class="h-3.5 w-3.5 text-muted-foreground/70 shrink-0"
@@ -695,9 +732,11 @@
         {mergedLabels.empty}
       </div>
     {:else}
-      <div class={`min-w-full ${contentClassName}`.trim()}>
+      <div class={`min-w-full @max-md:hidden ${contentClassName}`.trim()}>
         <table class="w-full table-fixed text-sm">
-          <thead class="sticky top-0 bg-[#0c0c12] border-b border-border">
+          <thead
+            class="sticky top-0 bg-surface-table-header border-b border-border"
+          >
             <tr class="text-left text-muted-foreground">
               <th class="px-3 py-0 font-medium">
                 <button
@@ -719,7 +758,7 @@
                   {/if}
                 </button>
               </th>
-              {#each columns as column}
+              {#each columns as column (column.id)}
                 <th
                   class="px-3 py-0 font-medium {column.widthClass ??
                     ''} {getResponsiveHideClass(column)}"
@@ -754,7 +793,7 @@
             </tr>
           </thead>
           <tbody>
-            {#each filtered as node}
+            {#each filtered as node (node.id)}
               <tr
                 class="border-b border-border/60 hover:bg-white/3 cursor-default"
                 on:dblclick={() => void activateNode(node)}
@@ -780,7 +819,7 @@
                     </div>
                   {/if}
                 </td>
-                {#each columns as column}
+                {#each columns as column (column.id)}
                   <td
                     class="px-3 py-2 text-muted-foreground truncate {column.cellClass ??
                       ''} {getResponsiveHideClass(column)}"
@@ -793,6 +832,46 @@
             {/each}
           </tbody>
         </table>
+      </div>
+
+      <div
+        class={`@md:hidden flex flex-col gap-1.5 p-2 ${contentClassName}`.trim()}
+      >
+        {#each filtered as node (node.id)}
+          {@const metadataLine = buildMetadataLine(node)}
+          {@const isContainer = isContainerNode(node)}
+          <button
+            type="button"
+            class="group flex w-full items-center gap-3 rounded-lg border border-border/70 bg-background/40 px-3 py-2.5 text-left transition-colors hover:border-white/15 hover:bg-white/[0.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+            on:click={() => void activateNode(node)}
+            title={node.name}
+          >
+            <span
+              class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border"
+              style={getCardIconStyle(node)}
+              aria-hidden="true"
+            >
+              <FileIcon name={node.name} {isContainer} />
+            </span>
+            <span class="min-w-0 flex-1">
+              <span
+                class="block truncate text-sm font-medium leading-tight text-white"
+                >{node.name}</span
+              >
+              {#if metadataLine}
+                <span
+                  class="mt-1 block truncate text-xs leading-tight text-muted-foreground"
+                  >{metadataLine}</span
+                >
+              {/if}
+            </span>
+            {#if isContainer}
+              <ChevronRight
+                class="h-4 w-4 shrink-0 text-muted-foreground/50 transition-colors group-hover:text-white/70"
+              />
+            {/if}
+          </button>
+        {/each}
       </div>
     {/if}
   </div>

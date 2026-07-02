@@ -1,14 +1,3 @@
 set -e
 
-# Frontend: prettier + eslint via lint-staged (auto re-stages)
-(cd frontend && bunx lint-staged)
-
-# Go: format check (no auto-write — keep commits intentional)
-unformatted="$(gofmt -l main.go trafficlight_*.go internal/)"
-if [ -n "$unformatted" ]; then
-  printf '\n\033[31mGo files are not formatted:\033[0m\n%s\n\nRun: make fmt-go && git add -u\n' "$unformatted"
-  exit 1
-fi
-
-# Go: lint
-make lint-go
+bun run --silent precommit

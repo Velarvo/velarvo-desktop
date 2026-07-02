@@ -41,6 +41,7 @@ frontend/package.json.md5
 
 # Go and test artifacts
 .cache/
+.gocache/
 coverage.out
 coverage/
 *.coverprofile

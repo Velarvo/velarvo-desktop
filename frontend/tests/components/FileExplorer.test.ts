@@ -60,8 +60,8 @@ describe('FileExplorer', () => {
       },
     })
 
-    expect(await screen.findByText('Documents')).toBeTruthy()
-    expect(screen.getByText('archive.zip')).toBeTruthy()
+    expect((await screen.findAllByText('Documents')).length).toBeGreaterThan(0)
+    expect(screen.getAllByText('archive.zip').length).toBeGreaterThan(0)
     expect(dataSource.loadNodes).toHaveBeenCalledWith('/fixture-root')
   })
 
@@ -74,12 +74,12 @@ describe('FileExplorer', () => {
       },
     })
 
-    const documentsButton = await screen.findByRole('button', {
+    const documentsButtons = await screen.findAllByRole('button', {
       name: 'Documents',
     })
-    await fireEvent.click(documentsButton)
+    await fireEvent.click(documentsButtons[0])
 
-    expect(await screen.findByText('notes.txt')).toBeTruthy()
+    expect((await screen.findAllByText('notes.txt')).length).toBeGreaterThan(0)
     expect(dataSource.loadNodes).toHaveBeenCalledWith('/fixture-root/Documents')
   })
 
@@ -92,14 +92,14 @@ describe('FileExplorer', () => {
       },
     })
 
-    await screen.findByText('Documents')
+    await screen.findAllByText('Documents')
 
-    const searchInput = screen.getByPlaceholderText('Search...')
+    const searchInput = screen.getByPlaceholderText('Search files...')
     await fireEvent.input(searchInput, { target: { value: 'archive' } })
 
     await waitFor(() => {
       expect(screen.queryByText('Documents')).toBeNull()
-      expect(screen.getByText('archive.zip')).toBeTruthy()
+      expect(screen.getAllByText('archive.zip').length).toBeGreaterThan(0)
     })
   })
 
@@ -116,7 +116,7 @@ describe('FileExplorer', () => {
       },
     })
 
-    await screen.findByText('Documents')
+    await screen.findAllByText('Documents')
 
     const root = container.firstElementChild
     expect(root?.className).toContain('shadow-xl')

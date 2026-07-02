@@ -15,13 +15,10 @@
   <div class="flex flex-1 overflow-hidden">
     <Sidebar {collapsed} />
 
-    <main class="relative flex-1 overflow-auto bg-[#07070b]">
-      <div
-        class="pointer-events-none absolute top-0 inset-x-0 h-48 bg-primary/[0.03] blur-3xl"
-      ></div>
-      <div class="relative z-10 p-5">
-        <slot />
-      </div>
+    <main
+      class="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-surface-canvas"
+    >
+      <slot />
     </main>
   </div>
 </div>

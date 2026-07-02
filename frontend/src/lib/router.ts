@@ -1,16 +1,33 @@
 import { writable } from 'svelte/store'
 
-export const route = writable(window.location.pathname || '/')
+const STORAGE_KEY = 'velarvo:route'
+const DEFAULT_ROUTE = '/dashboard'
 
-window.addEventListener('popstate', () => {
-  route.set(window.location.pathname || '/')
-})
+const readStoredRoute = (): string => {
+  if (typeof window === 'undefined') {
+    return DEFAULT_ROUTE
+  }
 
-export const navigate = (path: string) => {
-  if (window.location.pathname === path) {
+  try {
+    return window.localStorage.getItem(STORAGE_KEY) || DEFAULT_ROUTE
+  } catch {
+    return DEFAULT_ROUTE
+  }
+}
+
+const persistRoute = (path: string) => {
+  if (typeof window === 'undefined') {
     return
   }
 
-  window.history.pushState({}, '', path)
+  try {
+    window.localStorage.setItem(STORAGE_KEY, path)
+  } catch {}
+}
+
+export const route = writable<string>(readStoredRoute())
+
+export const navigate = (path: string) => {
+  persistRoute(path)
   route.set(path)
 }

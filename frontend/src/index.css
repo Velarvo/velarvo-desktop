@@ -3,12 +3,13 @@
 @theme inline {
   --color-background: #0d0d0d;
   --color-foreground: #fafafa;
-  --color-card: #0a0a0a;
+  --color-card: #0a0a0f;
   --color-card-foreground: #fafafa;
-  --color-popover: #0a0a0a;
+  --color-popover: #0e0e14;
   --color-popover-foreground: #fafafa;
 
   --color-primary: #12ce90;
+  --color-primary-rgb: 18 206 144;
   --color-primary-foreground: #1a1a1a;
   --color-secondary: #262626;
   --color-secondary-foreground: #fafafa;
@@ -29,14 +30,42 @@
   --color-chart-4: #a566ff;
   --color-chart-5: #ff5999;
 
-  --color-sidebar-background: #1a1b1a;
+  --color-surface-canvas: #07070b;
+  --color-surface-base: #0a0a0f;
+  --color-surface-subtle: #08080c;
+  --color-surface-raised: #0e0e14;
+  --color-surface-elevated: #101016;
+  --color-surface-panel: #11111a;
+  --color-surface-field: #0c1016;
+  --color-surface-field-focus: #101722;
+  --color-surface-overlay: #05060a;
+  --color-surface-table-header: #0c0c12;
+  --color-surface-security: #090b10;
+  --color-modal-start: rgba(15, 16, 22, 0.98);
+  --color-modal-end: rgba(8, 9, 13, 0.98);
+  --color-menu-start: rgba(15, 16, 21, 1);
+  --color-menu-end: rgba(10, 10, 15, 1);
+
+  --color-warning: #f4c23a;
+  --color-warning-foreground: #171100;
+  --color-workspace: #38bdf8;
+  --color-workspace-rgb: 56 189 248;
+  --color-sky-accent-rgb: 73 196 255;
+  --color-violet-accent-rgb: 168 85 247;
+  --color-swatch-foreground: #04110b;
+
+  --color-sidebar-background: #0a0a0f;
   --color-sidebar-foreground: #f4f4f4;
-  --color-sidebar-primary: #497bb3;
-  --color-sidebar-primary-foreground: #ffffff;
-  --color-sidebar-accent: #292c2c;
+  --color-sidebar-rail: #08080c;
+  --color-sidebar-panel: #0a0a0f;
+  --color-sidebar-popover: #11111a;
+  --color-sidebar-tooltip: #101016;
+  --color-sidebar-primary: #12ce90;
+  --color-sidebar-primary-foreground: #1a1a1a;
+  --color-sidebar-accent: #101016;
   --color-sidebar-accent-foreground: #f4f4f4;
-  --color-sidebar-border: #292c2c;
-  --color-sidebar-ring: #3fbb96;
+  --color-sidebar-border: #262626;
+  --color-sidebar-ring: #12ce90;
 }
 .drag-region {
   -webkit-app-region: drag;
@@ -48,17 +77,9 @@
   pointer-events: none;
 }
 
-body {
+.no-select {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-}
-
-* {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  -webkit-user-drag: none;
 }

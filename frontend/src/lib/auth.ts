@@ -2,7 +2,9 @@ import { derived, writable } from 'svelte/store'
 import { GetAuthState, Login, Logout, Register } from '../../wailsjs/go/app/App'
 import type { APIResponse } from '@/types/api'
 import type { LoginCredentials, RegisterData } from '@/types/auth'
+import { toClientErrorResponse } from '@/lib/errors'
 import { logger } from '@/lib/logger'
+import { clearProjects } from '@/lib/projects'
 
 export interface User {
   userId: string
@@ -25,12 +27,6 @@ const toUser = (payload: Record<string, string>): User => ({
 const applyUser = (payload?: Record<string, string>) => {
   user.set(payload ? toUser(payload) : null)
 }
-
-const toClientError = (error: unknown): APIResponse => ({
-  success: false,
-  code: 'CLIENT_ERROR',
-  error: error instanceof Error ? error.message : 'Unexpected client error',
-})
 
 export const bootstrapAuth = async () => {
   isLoadingAuth.set(true)
@@ -60,7 +56,7 @@ export const login = async (
     return resp as APIResponse
   } catch (error) {
     logger.error('Login failed', error)
-    return toClientError(error)
+    return toClientErrorResponse(error)
   }
 }
 
@@ -74,7 +70,7 @@ export const register = async (data: RegisterData): Promise<APIResponse> => {
     )) as APIResponse
   } catch (error) {
     logger.error('Registration failed', error)
-    return toClientError(error)
+    return toClientErrorResponse(error)
   }
 }
 
@@ -82,10 +78,12 @@ export const logout = async (): Promise<APIResponse> => {
   try {
     const resp = (await Logout()) as APIResponse
     applyUser()
+    clearProjects()
     return resp
   } catch (error) {
     logger.warn('Logout failed', error)
     applyUser()
-    return toClientError(error)
+    clearProjects()
+    return toClientErrorResponse(error)
   }
 }

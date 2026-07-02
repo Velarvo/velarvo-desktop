@@ -8,7 +8,6 @@
     "types": ["vite/client", "vitest/globals"],
     "skipLibCheck": true,
     "moduleResolution": "bundler",
-    "baseUrl": ".",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",

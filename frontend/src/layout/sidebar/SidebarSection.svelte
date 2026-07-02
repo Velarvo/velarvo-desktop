@@ -13,7 +13,7 @@
   } from 'lucide-svelte'
   import { IconApi, IconBrandGraphql } from '@tabler/icons-svelte'
   import FloatingDropdown from '@/components/ui/FloatingDropdown.svelte'
-  import { t } from '@/lib/i18n'
+  import { translate } from '@/lib/i18n'
   import {
     DEFAULT_API_METHOD,
     DEFAULT_GRAPHQL_METHOD,
@@ -82,14 +82,14 @@
   const newBlockPresets: NewBlockPreset[] = [
     {
       key: 'rest',
-      label: t('sidebar.blockTypes.rest'),
+      label: $translate('sidebar.blockTypes.rest'),
       icon: IconApi,
       type: 'API',
       method: DEFAULT_API_METHOD,
     },
     {
       key: 'graphql',
-      label: t('sidebar.blockTypes.graphql'),
+      label: $translate('sidebar.blockTypes.graphql'),
       icon: IconBrandGraphql,
       type: 'API',
       method: DEFAULT_GRAPHQL_METHOD,
@@ -107,7 +107,7 @@
 
   $: dragState = $sidebarDragStore
   $: isSourceOfDrag = dragState?.source.fromSectionId === section.id
-  $: draggedItemId = isSourceOfDrag ? dragState!.source.itemId : null
+  $: draggedItemId = isSourceOfDrag ? (dragState?.source.itemId ?? null) : null
 
   $: dropIndicator =
     dragState &&
@@ -117,17 +117,17 @@
       ? dragState.target.indicator
       : null
 
-  $: isClosedDropTarget = !!(
+  $: isHeaderDropTarget = !!(
     dragState &&
     dragState.target &&
     dragState.target.sectionId === section.id &&
-    !expanded
+    dragState.target.indicator.kind === 'header'
   )
 
   $: if (pendingNewBlockRename) {
     const candidate = [...section.items]
       .reverse()
-      .find((item) => item.name === t('sidebar.newBlockName'))
+      .find((item) => item.name === $translate('sidebar.newBlockName'))
     if (candidate) {
       pendingNewBlockRename = false
       void startItemRename(candidate.id, candidate.name)
@@ -213,7 +213,7 @@
   const addNewBlock = (preset: NewBlockPreset) => {
     dispatch('addItem', {
       sectionId: section.id,
-      name: t('sidebar.newBlockName'),
+      name: $translate('sidebar.newBlockName'),
       type: preset.type,
       status: preset.status,
       method: preset.method,
@@ -391,7 +391,7 @@
 <div>
   <div
     class="flex items-center gap-1.5 px-2 py-1.5"
-    data-sidebar-closed-header={!expanded && !collapsed ? 'true' : null}
+    data-sidebar-section-header={!collapsed ? 'true' : null}
     data-sidebar-section-id={section.id}
     data-sidebar-items-count={section.items.length}
   >
@@ -401,11 +401,11 @@
       on:click={handleHeaderClick}
       on:keydown={handleHeaderKeydown}
       on:contextmenu={openContextMenu}
-      class="group flex min-w-0 flex-1 items-center gap-2.5 rounded-md h-10 px-3 py-3 text-sm transition-colors duration-150 {collapsed
+      class="group flex min-w-0 flex-1 items-center gap-2.5 rounded-md h-8 px-3 py-3 text-sm transition-colors duration-150 {collapsed
         ? 'justify-center'
         : 'justify-between'} {expanded || highlighted
         ? 'text-white bg-white/5'
-        : 'text-muted-foreground hover:text-white hover:bg-white/3'} {isClosedDropTarget
+        : 'text-muted-foreground hover:text-white hover:bg-white/3'} {isHeaderDropTarget
         ? 'ring-2 ring-primary/80 bg-primary/10'
         : ''}"
     >
@@ -434,7 +434,7 @@
               bind:this={renameInputElement}
               bind:value={renameValue}
               class="h-7 w-full min-w-0 rounded-md border border-primary/40 bg-background px-2 text-[13px] font-medium text-white outline-none"
-              placeholder={t('sidebar.sectionNamePlaceholder')}
+              placeholder={$translate('sidebar.sectionNamePlaceholder')}
               on:click|stopPropagation
               on:mousedown|stopPropagation
               on:keydown={handleRenameKeydown}
@@ -454,7 +454,7 @@
               type="button"
               class="hidden group-hover:inline-flex items-center justify-center w-6 h-6 z-50 rounded text-muted-foreground hover:text-white hover:bg-white/10 transition-colors"
               on:click={openSectionAddFromButton}
-              aria-label={t('sidebar.ariaLabels.addNewBlock')}
+              aria-label={$translate('sidebar.ariaLabels.addNewBlock')}
             >
               <Plus size={13} />
             </button>
@@ -462,7 +462,7 @@
               type="button"
               class="hidden group-hover:inline-flex items-center justify-center w-6 h-6 z-50 rounded text-muted-foreground hover:text-white hover:bg-white/10 transition-colors"
               on:click={openSectionMenuFromButton}
-              aria-label={t('sidebar.ariaLabels.sectionOptions')}
+              aria-label={$translate('sidebar.ariaLabels.sectionOptions')}
             >
               <Ellipsis size={13} />
             </button>
@@ -486,8 +486,9 @@
         data-sidebar-items-list="true"
         data-section-id={section.id}
         data-items-count={section.items.length}
-        class="relative ml-3.5 border-l border-border/50 pl-3 pr-1 py-1 min-h-7 space-y-0.5 {dragState &&
-        dragState.target?.sectionId === section.id
+        class="relative ml-4.5 border-l border-border/50 pl-3 pr-1 py-1 min-h-7 space-y-0.5 {dragState &&
+        dragState.target?.sectionId === section.id &&
+        dragState.target.indicator.kind !== 'header'
           ? 'bg-primary/4 rounded-md transition-colors'
           : ''}"
       >
@@ -495,7 +496,7 @@
           <div
             class="rounded-md px-2.5 py-2 text-[12px] text-muted-foreground bg-white/2 border border-border/50"
           >
-            {t('sidebar.noConnections')}
+            {$translate('sidebar.noConnections')}
           </div>
         {/if}
 
@@ -529,7 +530,7 @@
               type="button"
               class="-m-1.5 shrink-0 rounded-md p-1.5 text-muted-foreground/55 transition-colors hover:bg-white/5 group-hover:text-muted-foreground cursor-grab active:cursor-grabbing"
               on:mousedown={(event) => handleItemDragStart(event, item.id)}
-              aria-label={t('sidebar.ariaLabels.dragBlock')}
+              aria-label={$translate('sidebar.ariaLabels.dragBlock')}
             >
               <GripVertical size={13} />
             </button>
@@ -551,7 +552,7 @@
                 bind:this={itemRenameInputElement}
                 bind:value={itemRenameValue}
                 class="h-7 w-full min-w-0 rounded-md border border-primary/40 bg-background px-2 text-[12px] text-white outline-none"
-                placeholder={t('sidebar.blockNamePlaceholder')}
+                placeholder={$translate('sidebar.blockNamePlaceholder')}
                 on:click|stopPropagation
                 on:mousedown|stopPropagation
                 on:keydown={(event) => handleItemRenameKeydown(event, item.id)}
@@ -564,7 +565,7 @@
                 class="inline-flex shrink-0 rounded p-1 text-muted-foreground/60 hover:text-white hover:bg-white/10 transition opacity-100 pointer-events-auto"
                 on:click={(event) => openItemMenu(event, item.id)}
                 on:contextmenu={(event) => openItemMenuContext(event, item.id)}
-                aria-label={t('sidebar.ariaLabels.blockOptions')}
+                aria-label={$translate('sidebar.ariaLabels.blockOptions')}
               >
                 <Ellipsis size={13} />
               </button>
@@ -587,7 +588,7 @@
   x={contextMenuX}
   y={contextMenuY}
   group="sidebar-context-menu"
-  panelClass="min-w-40 rounded-md border border-border bg-[#0e0e14] p-1 shadow-xl shadow-black/40"
+  panelClass="min-w-40 rounded-md border border-border bg-popover p-1 shadow-xl shadow-black/40"
   on:close={closeContextMenu}
 >
   <div data-sidebar-context-menu="true" role="menu" tabindex="-1">
@@ -595,7 +596,7 @@
       <div
         class="py-3 flex flex-row items-stretch justify-center gap-4 min-w-56"
       >
-        {#each newBlockPresets as preset}
+        {#each newBlockPresets as preset (preset.key)}
           <button
             type="button"
             class="flex flex-col items-center px-3 py-2 rounded-lg hover:bg-primary/10 focus:bg-primary/15 transition-colors min-w-20"
@@ -617,7 +618,7 @@
         on:click={openBlockTypePicker}
       >
         <Plus size={13} />
-        {t('sidebar.menu.addNewBlock')}
+        {$translate('sidebar.menu.addNewBlock')}
       </button>
       <button
         type="button"
@@ -625,7 +626,7 @@
         on:click={startRename}
       >
         <Pencil size={13} />
-        {t('sidebar.menu.rename')}
+        {$translate('sidebar.menu.rename')}
       </button>
       <div class="my-1 h-px bg-border"></div>
       <button
@@ -637,7 +638,7 @@
         }}
       >
         <Trash2 size={13} />
-        {t('sidebar.menu.deleteSection')}
+        {$translate('sidebar.menu.deleteSection')}
       </button>
     {/if}
   </div>
@@ -653,7 +654,7 @@
     : 'bottom-end'}
   offset={4}
   group="sidebar-item-menu"
-  panelClass="min-w-36 rounded-md border border-border bg-[#0e0e14] p-1 shadow-xl shadow-black/40"
+  panelClass="min-w-36 rounded-md border border-border bg-popover p-1 shadow-xl shadow-black/40"
   on:close={closeItemMenu}
 >
   <div role="menu" tabindex="-1">
@@ -663,7 +664,7 @@
       on:click={startItemRenameFromMenu}
     >
       <Pencil size={13} />
-      {t('sidebar.menu.rename')}
+      {$translate('sidebar.menu.rename')}
     </button>
     <div class="my-1 h-px bg-border"></div>
     <button
@@ -672,7 +673,7 @@
       on:click={deleteItemFromMenu}
     >
       <Trash2 size={13} />
-      {t('sidebar.menu.delete')}
+      {$translate('sidebar.menu.delete')}
     </button>
   </div>
 </FloatingDropdown>

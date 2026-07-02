@@ -19,7 +19,7 @@ const nativeConsole = {
 
 let bridgeInstalled = false
 
-function serialize(args: unknown[]): string {
+const serialize = (args: unknown[]): string => {
   return args
     .map((value) => {
       if (typeof value === 'string') {
@@ -39,7 +39,7 @@ function serialize(args: unknown[]): string {
     .join(' ')
 }
 
-function emit(level: LogLevel, args: unknown[]) {
+const emit = (level: LogLevel, args: unknown[]): void => {
   const message = serialize(args)
 
   if (typeof window === 'undefined' || !('runtime' in window)) {
@@ -62,7 +62,7 @@ function emit(level: LogLevel, args: unknown[]) {
   }
 }
 
-function bridge(method: ConsoleMethod, level: LogLevel): ConsoleMethod {
+const bridge = (method: ConsoleMethod, level: LogLevel): ConsoleMethod => {
   return (...args: unknown[]) => {
     method(...args)
     emit(level, args)
@@ -88,7 +88,7 @@ export const logger = {
   },
 }
 
-export function installGlobalLoggerBridge() {
+export const installGlobalLoggerBridge = (): void => {
   if (bridgeInstalled) {
     return
   }

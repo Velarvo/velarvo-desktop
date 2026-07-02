@@ -3,6 +3,7 @@ package app
 import (
 	"errors"
 
+	"github.com/Velarvo/velarvo-desktop/internal/apperrors"
 	"github.com/Velarvo/velarvo-desktop/internal/device"
 	"github.com/Velarvo/velarvo-desktop/internal/logger"
 	"github.com/Velarvo/velarvo-desktop/internal/session"
@@ -16,12 +17,12 @@ func authLog() *zap.SugaredLogger {
 
 func (a *App) GetAuthState() types.APIResponse[map[string]string] {
 	if !a.session.IsLoggedIn() {
-		return errResponse("NOT_AUTHENTICATED", "", nil)
+		return errResponse[map[string]string](string(apperrors.CodeNotAuthenticated), "", nil)
 	}
 
 	current := a.session.Get()
 	if current == nil {
-		return errResponse("NOT_AUTHENTICATED", "", nil)
+		return errResponse[map[string]string](string(apperrors.CodeNotAuthenticated), "", nil)
 	}
 
 	if current.UserID == "" {
@@ -29,7 +30,7 @@ func (a *App) GetAuthState() types.APIResponse[map[string]string] {
 		if !resp.Success {
 			refreshResp := a.Refresh()
 			if !refreshResp.Success {
-				return errResponse("SESSION_EXPIRED", "", nil)
+				return errResponse[map[string]string](string(apperrors.CodeSessionExpired), "", nil)
 			}
 
 			resp = a.fetchCurrentUser()
@@ -41,7 +42,7 @@ func (a *App) GetAuthState() types.APIResponse[map[string]string] {
 		return resp
 	}
 
-	return successResponse("AUTH_OK", "", map[string]string{
+	return successResponse(string(apperrors.CodeAuthOK), "", map[string]string{
 		"userId":    current.UserID,
 		"email":     current.Email,
 		"firstName": current.FirstName,
@@ -58,13 +59,13 @@ func (a *App) Register(email, firstName, lastName, password string) types.APIRes
 	})
 	if err != nil {
 		authLog().Errorw("register failed", "error", err)
-		return errResponse("REMOTE_CALL_ERROR", "", err)
+		return errResponse[map[string]string](string(apperrors.CodeRemoteCallError), "", err)
 	}
 	if !resp.Success {
-		return errResponse(resp.Code, resp.Message, errors.New(resp.Message))
+		return errResponse[map[string]string](resp.Code, resp.Message, errors.New(resp.Message))
 	}
 	if resp.Data == nil {
-		return errResponse("INVALID_RESPONSE", "", nil)
+		return errResponse[map[string]string](string(apperrors.CodeInvalidResponse), "", nil)
 	}
 
 	return successResponse(resp.Code, resp.Message, map[string]string{
@@ -77,7 +78,7 @@ func (a *App) Login(email, password string) types.APIResponse[map[string]string]
 	deviceID, err := device.GetOrCreateID()
 	if err != nil {
 		authLog().Errorw("failed to get device ID", "error", err)
-		return errResponse("DEVICE_ERROR", "", err)
+		return errResponse[map[string]string](string(apperrors.CodeDeviceError), "", err)
 	}
 
 	resp, err := a.client.Login(&types.LoginPayload{
@@ -89,18 +90,18 @@ func (a *App) Login(email, password string) types.APIResponse[map[string]string]
 	})
 	if err != nil {
 		authLog().Errorw("login failed", "error", err)
-		return errResponse("REMOTE_CALL_ERROR", "", err)
+		return errResponse[map[string]string](string(apperrors.CodeRemoteCallError), "", err)
 	}
 	if !resp.Success {
-		return errResponse(resp.Code, resp.Message, errors.New(resp.Message))
+		return errResponse[map[string]string](resp.Code, resp.Message, errors.New(resp.Message))
 	}
 	if resp.Data == nil {
-		return errResponse("INVALID_RESPONSE", "", nil)
+		return errResponse[map[string]string](string(apperrors.CodeInvalidResponse), "", nil)
 	}
 
 	if err := a.keychain.SaveTokens(resp.Data.AccessToken, resp.Data.RefreshToken); err != nil {
 		authLog().Errorw("failed to save tokens", "error", err)
-		return errResponse("KEYCHAIN_ERROR", "", err)
+		return errResponse[map[string]string](string(apperrors.CodeKeychainError), "", err)
 	}
 
 	a.session.Set(&session.UserSession{
@@ -135,51 +136,51 @@ func (a *App) Logout() types.APIResponse[map[string]string] {
 	}
 	a.session.Clear()
 
-	return successResponse("AUTH_LOGOUT_OK", "", map[string]string{})
+	return successResponse(string(apperrors.CodeAuthLogoutOK), "", map[string]string{})
 }
 
 func (a *App) Refresh() types.APIResponse[map[string]string] {
 	refreshToken, err := a.keychain.GetRefreshToken()
 	if err != nil {
-		return errResponse("KEYCHAIN_ERROR", "", err)
+		return errResponse[map[string]string](string(apperrors.CodeKeychainError), "", err)
 	}
 
 	resp, err := a.client.Refresh(&types.RefreshPayload{RefreshToken: refreshToken})
 	if err != nil {
 		authLog().Errorw("refresh failed", "error", err)
-		return errResponse("REMOTE_CALL_ERROR", "", err)
+		return errResponse[map[string]string](string(apperrors.CodeRemoteCallError), "", err)
 	}
 	if !resp.Success {
 		if err := a.keychain.ClearTokens(); err != nil {
 			authLog().Warnw("failed to clear tokens from keychain", "error", err)
 		}
 		a.session.Clear()
-		return errResponse(resp.Code, resp.Message, errors.New(resp.Message))
+		return errResponse[map[string]string](resp.Code, resp.Message, errors.New(resp.Message))
 	}
 	if resp.Data == nil {
-		return errResponse("INVALID_RESPONSE", "", nil)
+		return errResponse[map[string]string](string(apperrors.CodeInvalidResponse), "", nil)
 	}
 
 	if err := a.keychain.SaveTokens(resp.Data.AccessToken, resp.Data.RefreshToken); err != nil {
 		authLog().Errorw("failed to persist refreshed tokens", "error", err)
-		return errResponse("KEYCHAIN_ERROR", "", err)
+		return errResponse[map[string]string](string(apperrors.CodeKeychainError), "", err)
 	}
 
 	a.session.UpdateTokens(resp.Data.AccessToken, resp.Data.RefreshToken)
-	return successResponse("AUTH_REFRESH_OK", "", map[string]string{})
+	return successResponse(string(apperrors.CodeAuthRefreshOK), "", map[string]string{})
 }
 
 func (a *App) fetchCurrentUser() types.APIResponse[map[string]string] {
 	resp, err := a.client.GetCurrentUser()
 	if err != nil {
 		authLog().Errorw("failed to fetch current user", "error", err)
-		return errResponse("REMOTE_CALL_ERROR", "", err)
+		return errResponse[map[string]string](string(apperrors.CodeRemoteCallError), "", err)
 	}
 	if !resp.Success {
-		return errResponse(resp.Code, resp.Message, errors.New(resp.Message))
+		return errResponse[map[string]string](resp.Code, resp.Message, errors.New(resp.Message))
 	}
 	if resp.Data == nil {
-		return errResponse("INVALID_RESPONSE", "", nil)
+		return errResponse[map[string]string](string(apperrors.CodeInvalidResponse), "", nil)
 	}
 
 	current := a.session.Get()
@@ -190,7 +191,7 @@ func (a *App) fetchCurrentUser() types.APIResponse[map[string]string] {
 		current.LastName = strOrEmpty(resp.Data.LastName)
 	}
 
-	return successResponse("AUTH_OK", "", map[string]string{
+	return successResponse(string(apperrors.CodeAuthOK), "", map[string]string{
 		"userId":    resp.Data.ID,
 		"email":     resp.Data.Email,
 		"firstName": strOrEmpty(resp.Data.FirstName),

@@ -11,7 +11,7 @@ export type DropTarget = {
   indicator:
     | { kind: 'before' | 'after'; itemId: string }
     | { kind: 'empty' }
-    | { kind: 'closed' }
+    | { kind: 'header' }
 }
 
 export type DragState = {
@@ -44,13 +44,13 @@ const resolveDropTarget = (
 ): DropTarget | null => {
   if (typeof document === 'undefined') return null
 
-  const closedHeaders = Array.from(
+  const sectionHeaders = Array.from(
     document.querySelectorAll<HTMLElement>(
-      '[data-sidebar-closed-header="true"]',
+      '[data-sidebar-section-header="true"]',
     ),
   )
 
-  for (const header of closedHeaders) {
+  for (const header of sectionHeaders) {
     if (!pointerInside(header.getBoundingClientRect(), clientX, clientY))
       continue
 
@@ -62,7 +62,7 @@ const resolveDropTarget = (
     return {
       sectionId,
       toIndex: itemCount,
-      indicator: { kind: 'closed' },
+      indicator: { kind: 'header' },
     }
   }
 

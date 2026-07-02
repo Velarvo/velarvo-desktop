@@ -22,8 +22,11 @@ func TestListDirectoryReturnsSortedExplorerNodes(t *testing.T) {
 	require.NoError(t, os.WriteFile(readmePath, []byte("hello"), 0o644))
 	require.NoError(t, os.WriteFile(archivePath, []byte("archive"), 0o644))
 
-	nodes, err := (&app.App{}).ListDirectory(dir)
-	require.NoError(t, err)
+	resp := (&app.App{}).ListDirectory(dir)
+	require.True(t, resp.Success)
+	require.NotNil(t, resp.Data)
+
+	nodes := *resp.Data
 	require.Len(t, nodes, 3)
 
 	assertNode(t, &nodes[0], &app.ExplorerNode{
@@ -55,10 +58,10 @@ func TestListDirectoryReturnsErrorForMissingPath(t *testing.T) {
 
 	missingPath := filepath.Join(t.TempDir(), "missing")
 
-	nodes, err := (&app.App{}).ListDirectory(missingPath)
+	resp := (&app.App{}).ListDirectory(missingPath)
 
-	require.Error(t, err)
-	assert.Nil(t, nodes)
+	require.False(t, resp.Success)
+	assert.Nil(t, resp.Data)
 }
 
 func assertNode(t *testing.T, got, want *app.ExplorerNode) {
