@@ -58,7 +58,7 @@ jobs:
         with:
           repo-checkout: false
           go-version-file: go.mod
-          go-package: . ./internal/...
+          go-package: ./...
           output-format: text
 
   trivy:
