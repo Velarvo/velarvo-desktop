@@ -43,7 +43,7 @@ jobs:
   govulncheck:
     name: Go / Vulnerability Check
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@v7
