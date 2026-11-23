@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tooltip } from '@/components/ui/tooltip'
   import type { IconComponent } from '@/types/icon'
   import IconButton from '@/components/ui/IconButton.svelte'
   import Input from '@/components/ui/Input.svelte'
@@ -525,7 +526,10 @@
                 type="button"
                 class="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground opacity-0 transition hover:bg-fill-active hover:text-white focus-visible:opacity-100 group-hover:opacity-100"
                 aria-label={t('sftp.openFiles', 'Open files (SFTP)')}
-                title={t('sftp.openFiles', 'Open files (SFTP)')}
+                {@attach tooltip({
+                  content: t('sftp.openFiles', 'Open files (SFTP)'),
+                  placement: 'right',
+                })}
                 onclick={(event) => {
                   event.stopPropagation()
                   openSFTP(connection)

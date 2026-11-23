@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tooltip } from '@/components/ui/tooltip'
   import { ImageUp, LoaderCircle, X } from '@lucide/svelte'
   import Alert from '@/components/ui/Alert.svelte'
   import Button from '@/components/ui/Button.svelte'
@@ -106,7 +107,10 @@
         type="button"
         class="group relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-lg bg-primary text-2xl font-black text-swatch-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] disabled:cursor-not-allowed"
         aria-label={t('projects.create.chooseIcon')}
-        title={t('projects.create.chooseIcon')}
+        {@attach tooltip({
+          content: t('projects.create.chooseIcon'),
+          placement: 'bottom',
+        })}
         disabled={busy}
         onclick={() => fileInput?.click()}
       >

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tooltip } from '@/components/ui/tooltip'
   import { onDestroy, onMount, tick } from 'svelte'
   import { Check, Copy, Info, Plus, X } from '@lucide/svelte'
   import Alert from '@/components/ui/Alert.svelte'
@@ -486,7 +487,10 @@
                   <dd class="flex min-w-0 items-center gap-2">
                     <span
                       class="min-w-0 truncate font-mono text-white/85"
-                      title={publicKeyFingerprint}
+                      {@attach tooltip({
+                        content: publicKeyFingerprint,
+                        overflowOnly: true,
+                      })}
                     >
                       {publicKeyFingerprint}
                     </span>
@@ -516,9 +520,11 @@
                             : 'truncate'
                         }`}
                         aria-expanded={showPublicKey}
-                        title={showPublicKey
-                          ? t('ssh.collapsePublicKey', 'Collapse')
-                          : t('ssh.expandPublicKey', 'Show the whole key')}
+                        {@attach tooltip({
+                          content: showPublicKey
+                            ? t('ssh.collapsePublicKey', 'Collapse')
+                            : t('ssh.expandPublicKey', 'Show the whole key'),
+                        })}
                         onclick={() => (showPublicKey = !showPublicKey)}
                       >
                         {publicKeyValue}
@@ -697,7 +703,10 @@
     <Button
       variant="secondary"
       size="sm"
-      title={`${modKey} S`}
+      {@attach tooltip({
+        content: t('common.save', 'Save'),
+        shortcut: `${modKey}S`,
+      })}
       disabled={busy || keyBusy}
       onclick={save}
     >

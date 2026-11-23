@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tooltip } from '@/components/ui/tooltip'
   import { onMount } from 'svelte'
   import {
     ArrowDownToLine,
@@ -728,7 +729,7 @@
     {icon}
     {label}
     size="sm"
-    title={detail ? `${label}: ${detail}` : label}
+    tooltip={detail ? `${label}: ${detail}` : label}
     disabled={!enabled}
     onclick={() => void runHistory(run)}
   />
@@ -757,7 +758,10 @@
           class="min-w-0 text-[11px] {notice.current.isError
             ? 'line-clamp-2 select-text text-red-400'
             : 'truncate text-primary'}"
-          title={notice.current.text}
+          {@attach tooltip({
+            content: notice.current.text,
+            overflowOnly: true,
+          })}
         >
           {notice.current.text}
         </span>

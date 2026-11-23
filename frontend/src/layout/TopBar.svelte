@@ -159,6 +159,7 @@
   style="--wails-draggable: drag;"
 >
   <IconButton
+    tooltipPlacement="bottom"
     icon={PanelLeft}
     label={t('topbar.toggleSidebar', 'Toggle sidebar')}
     onclick={onToggle}
@@ -326,6 +327,7 @@
 
   <div class="ml-auto flex shrink-0 items-center">
     <IconButton
+      tooltipPlacement="bottom"
       icon={Settings}
       label={t('topbar.openSecuritySettings')}
       onclick={openSettingsModal}

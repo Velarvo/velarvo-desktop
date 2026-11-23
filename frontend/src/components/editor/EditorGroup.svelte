@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tooltip } from '@/components/ui/tooltip'
   import { onDestroy, tick } from 'svelte'
   import IconButton from '@/components/ui/IconButton.svelte'
   import {
@@ -347,7 +348,10 @@
               event.key === 'Enter' && activateTab(group.id, tab.id)}
             ondragstart={(event) => onTabDragStart(event, tab)}
             ondragend={onTabDragEnd}
-            title="{tab.title} · {t(...TAB_KIND_LABEL[tab.kind])}"
+            {@attach tooltip({
+              content: `${tab.title} · ${t(...TAB_KIND_LABEL[tab.kind])}`,
+              placement: 'bottom',
+            })}
           >
             {#if isActiveTab && isActiveGroup}
               <span class="absolute inset-x-0 top-0 h-0.5 bg-primary"></span>
@@ -363,6 +367,7 @@
             />
             <span class="truncate">{tab.title}</span>
             <IconButton
+              tooltipPlacement="bottom"
               icon={X}
               size="xs"
               label={t('editor.closeTab', 'Close tab')}
@@ -389,6 +394,7 @@
         {/if}
 
         <IconButton
+          tooltipPlacement="bottom"
           icon={Plus}
           size="sm"
           class="ml-1 self-center"
@@ -400,12 +406,14 @@
 
     <div class="flex shrink-0 items-center gap-0.5 border-l border-border px-1">
       <IconButton
+        tooltipPlacement="bottom"
         icon={SplitSquareHorizontal}
         size="sm"
         label={t('editor.splitRight', 'Split right')}
         onclick={() => splitGroup(group.id, 'right')}
       />
       <IconButton
+        tooltipPlacement="bottom"
         icon={SplitSquareVertical}
         size="sm"
         label={t('editor.splitDown', 'Split down')}
@@ -413,6 +421,7 @@
       />
       {#if canClose}
         <IconButton
+          tooltipPlacement="bottom"
           icon={X}
           size="sm"
           danger

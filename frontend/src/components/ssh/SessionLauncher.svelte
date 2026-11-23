@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tooltip } from '@/components/ui/tooltip'
   import { tick } from 'svelte'
   import { CornerDownLeft, Plus, Search, Server } from '@lucide/svelte'
   import Button from '@/components/ui/Button.svelte'
@@ -158,7 +159,7 @@
                 {#if isSSHConnected(connection)}
                   <span
                     class="absolute -right-0.5 -bottom-0.5 h-2.5 w-2.5 rounded-full border-2 border-surface-canvas bg-primary"
-                    title={t('ssh.connected')}
+                    {@attach tooltip({ content: t('ssh.connected') })}
                   ></span>
                 {/if}
               </span>

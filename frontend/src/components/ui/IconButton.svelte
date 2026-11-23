@@ -6,6 +6,8 @@
 <script lang="ts">
   import type { HTMLButtonAttributes } from 'svelte/elements'
   import type { IconComponent } from '@/types/icon'
+  import { tooltip as tooltipAttachment } from './tooltip'
+  import type { TooltipPlacement } from './tooltip'
 
   interface Props extends Omit<HTMLButtonAttributes, 'class' | 'children'> {
     icon: IconComponent
@@ -13,6 +15,8 @@
     size?: IconButtonSize
     variant?: IconButtonVariant
     pressed?: boolean
+    tooltip?: string | boolean
+    tooltipPlacement?: TooltipPlacement
     danger?: boolean
     ref?: HTMLButtonElement | null
     class?: string
@@ -25,6 +29,8 @@
     size = 'md',
     variant = 'ghost',
     pressed = undefined,
+    tooltip = true,
+    tooltipPlacement = 'top',
     danger = false,
     type = 'button',
     ref = $bindable(null),
@@ -55,7 +61,11 @@
   bind:this={ref}
   {type}
   aria-label={label}
-  title={label}
+  {@attach tooltipAttachment({
+    content: typeof tooltip === 'string' ? tooltip : label,
+    placement: tooltipPlacement,
+    disabled: tooltip === false,
+  })}
   aria-pressed={pressed}
   class={[
     'inline-flex shrink-0 items-center justify-center rounded-md transition outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:pointer-events-none disabled:opacity-40',

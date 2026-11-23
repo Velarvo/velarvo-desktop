@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tooltip } from '@/components/ui/tooltip'
   import { onDestroy, onMount, tick } from 'svelte'
   import IconButton from '@/components/ui/IconButton.svelte'
   import Input from '@/components/ui/Input.svelte'
@@ -41,6 +42,9 @@
     preserveHistory?: boolean
     forceRefresh?: boolean
   }
+
+  const nameTooltip = (content: string) =>
+    tooltip({ content, placement: 'top-start', overflowOnly: true })
 
   const cloneExplorerNodes = (items: ExplorerNode[]) => {
     return items.map((item) => ({
@@ -988,6 +992,7 @@
     {icon}
     {label}
     size="sm"
+    tooltipPlacement="bottom"
     class={extraClass}
     {disabled}
     {onclick}
@@ -1039,6 +1044,7 @@
     <IconButton
       icon={RefreshCw}
       size="sm"
+      tooltipPlacement="bottom"
       label={mergedLabels.refresh}
       iconClass={isRefreshing ? 'animate-spin' : ''}
       onclick={handleRefresh}
@@ -1062,6 +1068,7 @@
       <IconButton
         icon={showHiddenItems ? Eye : EyeOff}
         size="sm"
+        tooltipPlacement="bottom-end"
         class="ml-0.5"
         pressed={showHiddenItems}
         label={showHiddenItems
@@ -1107,6 +1114,7 @@
       <IconButton
         icon={copiedPath ? Check : Copy}
         size="xs"
+        tooltipPlacement="bottom-end"
         label={copiedPath ? mergedLabels.copied : mergedLabels.copyCurrentPath}
         iconClass={copiedPath ? 'text-primary' : ''}
         onclick={copyCurrentPath}
@@ -1244,18 +1252,26 @@
                         if (!hasSelectionModifier(event))
                           void activateNode(node)
                       }}
-                      title={node.name}
                     >
                       <FileIcon name={node.name} isContainer />
-                      <span class="truncate min-w-0">{node.name}</span>
+                      <span
+                        class="truncate min-w-0"
+                        {@attach nameTooltip(node.name)}
+                      >
+                        {node.name}
+                      </span>
                     </button>
                   {:else}
                     <div
                       class="flex w-full items-center gap-2 text-left text-white cursor-default min-w-0"
-                      title={node.name}
                     >
                       <FileIcon name={node.name} />
-                      <span class="truncate min-w-0">{node.name}</span>
+                      <span
+                        class="truncate min-w-0"
+                        {@attach nameTooltip(node.name)}
+                      >
+                        {node.name}
+                      </span>
                     </div>
                   {/if}
                 </td>
@@ -1263,7 +1279,7 @@
                   <td
                     class="px-3 py-1.5 text-xs text-muted-foreground truncate {column.cellClass ??
                       ''} {getResponsiveHideClass(column)}"
-                    title={column.render(node)}
+                    {@attach nameTooltip(column.render(node))}
                   >
                     {column.render(node)}
                   </td>
