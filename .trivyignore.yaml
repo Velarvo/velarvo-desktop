@@ -1,0 +1,5 @@
+misconfigurations:
+  - id: DS-0002
+    paths:
+      - build/docker/Dockerfile.cross
+    statement: Build-only cross-compilation image run locally via docker run; never deployed as a service.
