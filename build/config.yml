@@ -7,7 +7,7 @@ info:
   description: "Developer workspace for SSH, SFTP, databases and APIs"
   copyright: "© 2026 Josef Zeman"
   comments: "Velarvo Desktop"
-  version: "0.1.0" # x-release-please-version
+  version: "0.2.0" # x-release-please-version
 
 dev_mode:
   root_path: .
