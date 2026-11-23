@@ -1,0 +1,56 @@
+version: 2
+
+updates:
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Prague
+    groups:
+      wails:
+        patterns: ["github.com/wailsapp/*"]
+      go-dependencies:
+        patterns: ["*"]
+
+  - package-ecosystem: bun
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:10"
+      timezone: Europe/Prague
+    groups:
+      root-tooling:
+        patterns: ["*"]
+
+  - package-ecosystem: bun
+    directory: /frontend
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:20"
+      timezone: Europe/Prague
+    groups:
+      wails-runtime:
+        patterns: ["@wailsio/runtime"]
+      frontend-dependencies:
+        dependency-type: production
+        patterns: ["*"]
+      frontend-tooling:
+        dependency-type: development
+        patterns: ["*"]
+
+  - package-ecosystem: github-actions
+    directories:
+      - /
+      - /.github/actions/*
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:30"
+      timezone: Europe/Prague
+    groups:
+      github-actions:
+        patterns: ["*"]

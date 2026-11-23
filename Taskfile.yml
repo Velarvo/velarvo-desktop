@@ -1,0 +1,125 @@
+version: '3'
+
+vars:
+  APP_NAME: "velarvo"
+  BUNDLE_NAME: "Velarvo"
+  BIN_DIR: "bin"
+  PACKAGE_MANAGER: '{{.PACKAGE_MANAGER | default "bun"}}'
+  VITE_PORT: '{{.WAILS_VITE_PORT | default 9245}}'
+  GOOS: '{{.GOOS | default OS}}'
+  FRONTEND_DIR: frontend
+  GO_PACKAGES: . ./internal/...
+  GOLANGCI_CONFIG: .golangci.yml
+
+includes:
+  common: ./build/Taskfile.yml
+  windows: ./build/windows/Taskfile.yml
+  darwin: ./build/darwin/Taskfile.yml
+  linux: ./build/linux/Taskfile.yml
+
+tasks:
+  dev:
+    summary: Runs the application with hot reload
+    cmds:
+      - wails3 dev -config ./build/config.yml -port {{.VITE_PORT}}
+
+  build:
+    summary: Builds the application for the host (or GOOS) platform
+    cmds:
+      - task: "{{.GOOS}}:build"
+
+  package:
+    summary: Packages a production build of the application
+    cmds:
+      - task: "{{.GOOS}}:package"
+
+  run:
+    summary: Runs the last build of the application
+    cmds:
+      - task: "{{.GOOS}}:run"
+
+  bindings:
+    summary: Regenerates the TypeScript bindings in frontend/bindings
+    cmds:
+      - task: common:generate:bindings
+
+  install:
+    summary: Installs root tooling and frontend dependencies from the lockfiles
+    cmds:
+      - bun install --frozen-lockfile
+      - bun install --frozen-lockfile --cwd {{.FRONTEND_DIR}}
+
+  setup:docker:
+    summary: Builds the Docker image for cross-compilation (~800MB download)
+    cmds:
+      - task: common:setup:docker
+
+  check:
+    summary: Runs every check CI runs
+    cmds:
+      - task: format:check
+      - task: lint
+      - task: typecheck
+      - task: frontend:build
+
+  lint:
+    summary: Lints Go and frontend code
+    cmds:
+      - task: lint:go
+      - task: lint:frontend
+
+  lint:go:
+    cmds:
+      - golangci-lint run --config {{.GOLANGCI_CONFIG}} {{.GO_PACKAGES}}
+
+  lint:frontend:
+    dir: '{{.FRONTEND_DIR}}'
+    cmds:
+      - bun run lint
+
+  typecheck:
+    dir: '{{.FRONTEND_DIR}}'
+    cmds:
+      - bun run typecheck
+
+  fmt:
+    summary: Formats Go and frontend code
+    cmds:
+      - golangci-lint fmt --config {{.GOLANGCI_CONFIG}}
+      - bun run --cwd {{.FRONTEND_DIR}} format
+
+  format:check:
+    summary: Fails if any Go or frontend file is not formatted
+    cmds:
+      - golangci-lint fmt --config {{.GOLANGCI_CONFIG}} --diff
+      - bun run --cwd {{.FRONTEND_DIR}} format:check
+
+  frontend:build:
+    summary: Builds the production frontend bundle
+    dir: '{{.FRONTEND_DIR}}'
+    cmds:
+      - bun run build
+
+  audit:
+    summary: Audits dependencies for known vulnerabilities
+    cmds:
+      - bun audit --audit-level high
+      - bun audit --audit-level high --cwd {{.FRONTEND_DIR}}
+      - go run golang.org/x/vuln/cmd/govulncheck@latest {{.GO_PACKAGES}}
+
+  precommit:
+    summary: Formats and lints staged files (run by the husky pre-commit hook)
+    cmds:
+      - bun run --cwd {{.FRONTEND_DIR}} --silent lint:staged
+      - cmd: |
+          files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.go')
+          [ -z "$files" ] && exit 0
+          golangci-lint fmt --config {{.GOLANGCI_CONFIG}} $files
+          git add -- $files
+      - task: lint:go
+
+  prepush:
+    summary: Type-checks and builds the frontend (run by the husky pre-push hook)
+    cmds:
+      - task: typecheck
+      - task: frontend:build

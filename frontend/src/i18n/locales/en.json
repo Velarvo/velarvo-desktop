@@ -1,0 +1,435 @@
+{
+  "vault": {
+    "onboarding": {
+      "title": "Set a master password",
+      "subtitle": "Create a password to encrypt your saved connections",
+      "stepMasterPassword": "Step 1 of 2 · Security setup",
+      "stepCloudSync": "Step 2 of 2 · Optional cloud sync",
+      "warning": "Important: This password cannot be recovered. If you forget it, you will lose access to all your data.",
+      "masterPassword": "Master Password",
+      "confirmPassword": "Confirm Master Password",
+      "passwordPlaceholder": "At least 12 characters",
+      "confirmPasswordPlaceholder": "Enter password again",
+      "passwordStrength": "Password strength",
+      "creatingVault": "Creating vault...",
+      "validation": {
+        "passwordMin": "Master password must be at least 12 characters"
+      },
+      "requirements": {
+        "minLength": "At least 12 characters",
+        "letter": "Contains at least one letter",
+        "number": "Contains at least one number"
+      },
+      "createVault": "Create vault",
+      "securityNote": "End-to-end encrypted and stored locally",
+      "success": {
+        "title": "Vault created!",
+        "subtitle": "Your data is secured and stored locally",
+        "masterPasswordReady": "Master password is set. Your vault is now protected.",
+        "cloudSync": {
+          "title": "Sync between devices?",
+          "description": "Create an account to back up your encrypted vault",
+          "feature1": "Sync across unlimited devices",
+          "feature2": "End-to-end encrypted backup",
+          "feature3": "$5/month",
+          "enable": "Turn on cloud sync",
+          "skip": "Not now"
+        },
+        "laterNote": "You can turn on cloud sync later in settings"
+      }
+    },
+    "unlock": {
+      "title": "Unlock vault",
+      "masterPassword": "Master password",
+      "subtitle": "Enter your master password to decrypt the local vault key for this session.",
+      "passwordPlaceholder": "Enter your master password",
+      "submit": "Unlock vault",
+      "submitting": "Unlocking...",
+      "validation": {
+        "passwordRequired": "Master password is required."
+      }
+    }
+  },
+  "errors": {
+    "ACCESS_DENIED": "Access to this path was denied",
+    "FILESYSTEM_INVALID_PATH": "Invalid path.",
+    "FILESYSTEM_NOT_A_FILE": "This is not a regular file.",
+    "FILESYSTEM_TARGET_EXISTS": "A file with that name is already there.",
+    "INVALID_MASTER_PASSWORD": "Incorrect master password",
+    "PATH_NOT_FOUND": "Path not found",
+    "PROJECT_DUPLICATE_NAME": "Project name already exists",
+    "PROJECT_ICON_NOT_FOUND": "Project icon not found",
+    "PROJECT_INVALID_INPUT": "Invalid project input",
+    "PROJECT_NOT_FOUND": "Project not found",
+    "SETTINGS_UNSUPPORTED_VALUE": "This setting value is not supported.",
+    "SSH_CONNECT_FAILED": "Could not connect to the host. Check the address and credentials.",
+    "SSH_DUPLICATE_KEY": "This key is already in the workspace.",
+    "SSH_INVALID_INPUT": "Please fill in the required connection fields.",
+    "SSH_INVALID_KEY": "The SSH key could not be read. Check the key and its passphrase.",
+    "SSH_KEY_NOT_FOUND": "SSH key not found.",
+    "SSH_NOT_CONNECTED": "The connection is not active. Connect first.",
+    "SSH_NOT_FOUND": "SSH connection not found.",
+    "SSH_NO_AUTH_METHOD": "This connection has no password or key to authenticate with.",
+    "SSH_NO_WORKSPACE": "Select a workspace first.",
+    "SSH_TERMINAL_FAILED": "The terminal session failed.",
+    "UNKNOWN": "An unexpected error occurred, please try again",
+    "VAULT_ALREADY_SETUP": "Vault is already set up",
+    "VAULT_LOCKED": "Vault is locked",
+    "VAULT_NOT_SETUP": "Vault is not set up yet",
+    "WEAK_MASTER_PASSWORD": "Master password is too weak",
+    "WORKSPACE_DUPLICATE_NAME": "Workspace name already exists in this project",
+    "WORKSPACE_INVALID_INPUT": "Invalid workspace input",
+    "WORKSPACE_NOT_FOUND": "Workspace not found",
+    "WORKSPACE_PROJECT_MISSING": "Workspace project not found",
+    "SSH_SESSION_LIMIT": "The server refused another session on this connection (its MaxSessions limit). Close a terminal or raise MaxSessions in sshd_config."
+  },
+  "validation": {
+    "confirmPasswordRequired": "Please confirm your password",
+    "passwordsMismatch": "Passwords do not match"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back",
+    "continue": "Continue",
+    "loading": "Loading...",
+    "e2eEncrypted": "End-to-end encrypted vault",
+    "and": "and",
+    "close": "Close",
+    "active": "Active",
+    "locked": "Locked",
+    "unlocked": "Unlocked",
+    "off": "Off",
+    "confirm": "Confirm",
+    "copied": "Copied",
+    "copy": "Copy",
+    "optional": "Optional"
+  },
+  "vaultLayout": {
+    "heroLine1": "Desktop tools for",
+    "heroLine2": "databases, APIs,",
+    "heroLine3Prefix": "and ",
+    "heroLine3Accent": "infrastructure",
+    "description": "Use one app for database access, API requests, SSH sessions, and local connections."
+  },
+  "settings": {
+    "title": "Settings",
+    "security": {
+      "nav": "Security",
+      "title": "Security",
+      "subtitle": "How your local vault is protected.",
+      "vault": "Vault",
+      "vaultDescription": "Unlocked for this session. Locking it asks for the master password again.",
+      "lockVault": "Lock now",
+      "locking": "Locking...",
+      "autoLock": "Auto-lock",
+      "autoLockDescription": "The vault locks itself after this period of inactivity.",
+      "unlockMethod": "Unlock method",
+      "unlockMethodDescription": "The key needed to decrypt your vault.",
+      "masterPassword": "Master password"
+    },
+    "preferences": {
+      "nav": "Preferences",
+      "title": "Preferences",
+      "subtitle": "Interface defaults for this device.",
+      "language": "Language",
+      "languageDescription": "Changes apply immediately."
+    }
+  },
+  "projects": {
+    "create": {
+      "badge": "New Project",
+      "title": "Create a new project",
+      "subtitle": "Create a new project to manage connections.",
+      "name": "Project Name",
+      "namePlaceholder": "Project name",
+      "icon": "Project Image",
+      "iconHint": "Upload a square icon or image.",
+      "chooseIcon": "Choose image",
+      "removeIcon": "Remove project image",
+      "preparingIcon": "Preparing image...",
+      "iconUnsupported": "Choose a PNG, JPG or WebP image.",
+      "iconTooLarge": "This image is still too large after resizing.",
+      "iconCanvasError": "Image processing is not available.",
+      "iconFailed": "Project image could not be prepared.",
+      "preview": "Preview",
+      "previewFallback": "New Project",
+      "previewMeta": "Local vault project",
+      "create": "Create project",
+      "creating": "Creating project...",
+      "close": "Close create project modal",
+      "validation": {
+        "nameRequired": "Project name is required."
+      }
+    }
+  },
+  "workspaces": {
+    "create": {
+      "title": "Create a workspace",
+      "subtitle": "Workspaces group environments inside a project, like production, staging or local.",
+      "projectContext": "Project:",
+      "name": "Workspace Name",
+      "namePlaceholder": "Workspace name",
+      "color": "Accent color",
+      "preview": "Preview",
+      "previewFallback": "New Workspace",
+      "previewMeta": "Workspace inside the selected project",
+      "create": "Create workspace",
+      "creating": "Creating workspace...",
+      "close": "Close create workspace modal",
+      "validation": {
+        "nameRequired": "Workspace name is required.",
+        "projectRequired": "Select a project before creating a workspace."
+      }
+    }
+  },
+  "topbar": {
+    "projectsFallback": "Projects",
+    "projectSwitcherTitle": "Project Switcher",
+    "projectSwitcherSubtitle": "Choose your active vault project",
+    "createProject": "Create project",
+    "projectsLoading": "Loading projects...",
+    "projectsEmpty": "No projects yet. Create your first one to start organizing your vault.",
+    "addProject": "Add Project",
+    "workspaceFallback": "Workspace",
+    "workspaceSwitcherTitle": "Workspace Switcher",
+    "workspaceSwitcherSubtitle": "Select a project first to see workspaces",
+    "workspaceNoProject": "Select a project to manage its workspaces.",
+    "workspacesLoading": "Loading workspaces...",
+    "workspacesEmpty": "No workspaces yet for this project. Create the first one to get started.",
+    "createWorkspace": "Create workspace",
+    "addWorkspace": "Add Workspace",
+    "search": "Search...",
+    "openSecuritySettings": "Open security settings",
+    "toggleSidebar": "Toggle sidebar"
+  },
+  "explorer": {
+    "columns": {
+      "name": "Name",
+      "type": "Type",
+      "size": "Size",
+      "modified": "Modified"
+    },
+    "searchPlaceholder": "Search files...",
+    "loading": "Loading files...",
+    "empty": "No files found",
+    "openContainer": "Open folder",
+    "showHidden": "Show hidden files",
+    "hideHidden": "Hide hidden files",
+    "copy": "Copy",
+    "copied": "Copied",
+    "dataSourceMissing": "Explorer data source is not configured",
+    "loadFailed": "Failed to load items",
+    "initFailed": "Failed to initialize explorer",
+    "copyCurrentPath": "Copy current path",
+    "rename": "Rename",
+    "selectedCount": "{count} items",
+    "back": "Back",
+    "forward": "Forward",
+    "home": "Home",
+    "parent": "Parent folder",
+    "refresh": "Refresh"
+  },
+  "sidebar": {
+    "empty": "You don't have any sections yet. Add your first custom section below.",
+    "addSection": "Add section",
+    "resourceTypes": "Resource types",
+    "collections": "Collections",
+    "sectionNamePlaceholder": "Section name",
+    "blockNamePlaceholder": "Block name",
+    "newBlockName": "New block",
+    "noConnections": "No connections yet.",
+    "ariaLabels": {
+      "addNewBlock": "Add new block",
+      "sectionOptions": "Section options",
+      "blockOptions": "Block options",
+      "dragBlock": "Drag block"
+    },
+    "menu": {
+      "addNewBlock": "Add new block",
+      "rename": "Rename",
+      "delete": "Delete",
+      "deleteSection": "Delete section"
+    },
+    "blockTypes": {
+      "rest": "REST API",
+      "graphql": "GraphQL",
+      "ssh": "SSH"
+    },
+    "rail": {
+      "ssh": {
+        "label": "SSH",
+        "shortLabel": "SSH"
+      },
+      "ftp": {
+        "label": "File Transfer",
+        "shortLabel": "FTP"
+      },
+      "databases": {
+        "label": "Databases",
+        "shortLabel": "DB"
+      },
+      "api": {
+        "label": "API",
+        "shortLabel": "API"
+      }
+    },
+    "panels": {
+      "ssh": {
+        "eyebrow": "Access",
+        "title": "SSH Connections",
+        "searchPlaceholder": "Search SSH hosts...",
+        "empty": "No SSH connections yet."
+      },
+      "ftp": {
+        "eyebrow": "Transfer",
+        "title": "File Transfer Endpoints",
+        "searchPlaceholder": "Search FTP endpoints...",
+        "empty": "No file transfer endpoints yet."
+      },
+      "databases": {
+        "eyebrow": "Data",
+        "title": "Databases",
+        "searchPlaceholder": "Search connections...",
+        "empty": "No database connections yet."
+      }
+    },
+    "addSectionPanel": {
+      "title": "Add section",
+      "customSection": "Custom section",
+      "customSectionPlaceholder": "e.g. Messaging",
+      "add": "Add"
+    },
+    "createSSHConnection": "New SSH connection"
+  },
+  "ssh": {
+    "password": "Password",
+    "passwordPlaceholder": "Connection password",
+    "passwordStored": "•••••••• (stored)",
+    "passwordEditHint": "Leave blank to keep the current password.",
+    "clearPassword": "Remove stored password",
+    "passwordSet": "Set",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "saveAndConnect": "Save & connect",
+    "connected": "Connected",
+    "strictHostKeyHint": "Verifies the host key on first connect and rejects changes.",
+    "terminal": "Terminal",
+    "connecting": "Connecting…",
+    "closed": "Closed",
+    "connectionError": "Connection error",
+    "reconnect": "Reconnect",
+    "terminalFailed": "Could not open the terminal.",
+    "phaseChannel": "Secure channel",
+    "phaseSession": "Shell session",
+    "closedHint": "The remote shell ended. Reconnect to start a new session.",
+    "viewOutput": "Output",
+    "ready": "Ready",
+    "needsAuth": "Needs auth",
+    "sectionConnection": "Connection",
+    "fieldName": "Name",
+    "fieldHost": "Host",
+    "fieldPort": "Port",
+    "fieldUser": "Username",
+    "sectionAuth": "Authentication",
+    "fieldKey": "SSH key",
+    "keyPlaceholderShort": "Choose or create a key",
+    "removeKey": "Remove key",
+    "authorizedKeysHint": "Add the public key to ~/.ssh/authorized_keys on the server.",
+    "newKeyTitle": "New key",
+    "importKeyTitle": "Import pasted key",
+    "keyName": "Name",
+    "keyType": "Type",
+    "keyPassphrase": "Passphrase",
+    "optional": "Optional",
+    "working": "Working…",
+    "generate": "Generate",
+    "import": "Import",
+    "fieldPassword": "Password",
+    "passwordKeep": "•••••••• (unchanged)",
+    "removePassword": "Remove password",
+    "addKey": "SSH key",
+    "addPassword": "Password",
+    "saved": "Saved",
+    "connect": "Connect",
+    "keyPlaceholder": "Search keys or paste a private key",
+    "sshKey": "SSH Key",
+    "privateKey": "Private key",
+    "showSavedKeys": "Show saved keys",
+    "savedKeys": "Saved keys",
+    "importPastedKey": "Import pasted private key",
+    "importKeyHint": "Private key will be encrypted in the vault.",
+    "publicKeyOnly": "Public key only",
+    "publicKeyOnlyHint": "Paste the private key to create a usable SSH credential.",
+    "passphraseProtected": "Passphrase",
+    "noMatchingKeys": "No saved key matches",
+    "noSavedKeys": "No saved keys yet.",
+    "keyEmptyHint": "Create a new key below, or paste a private key to import it.",
+    "createKeyNamed": "Create key",
+    "createNewKey": "Create new key",
+    "createKeyHint": "Generate an Ed25519, RSA or ECDSA key pair",
+    "fingerprint": "Fingerprint",
+    "publicKey": "Public key",
+    "collapsePublicKey": "Collapse",
+    "expandPublicKey": "Show the whole key"
+  },
+  "sftp": {
+    "active": "active",
+    "clearFinished": "Clear finished",
+    "copyFailed": "Could not copy the path",
+    "copyPath": "Copy path",
+    "copySuffix": "copy",
+    "create": "Create",
+    "delete": "Delete",
+    "deleteConfirm": "Delete {name} from the server? This cannot be undone.",
+    "deleted": "Deleted",
+    "download": "Download",
+    "downloaded": "Downloaded",
+    "dragHint": "Drag files between panes",
+    "duplicate": "Duplicate",
+    "files": "Files",
+    "folderName": "Folder name",
+    "newFolder": "New folder",
+    "newFolderPrompt": "New folder name",
+    "newName": "New name",
+    "noTransfers": "No transfers yet.",
+    "pathCopied": "Path copied",
+    "phaseSession": "SFTP session",
+    "redo": "Redo",
+    "remote": "Remote",
+    "rename": "Rename",
+    "server": "Server",
+    "thisMac": "This computer",
+    "title": "File transfer",
+    "transfers": "Transfers",
+    "undo": "Undo",
+    "upload": "Upload",
+    "uploaded": "Uploaded",
+    "deleteTitle": "Delete from the server?",
+    "previewLoading": "Reading the file...",
+    "previewBinary": "This file has no preview. Transfer it to open it.",
+    "previewTooLarge": "This file is too large to preview. Transfer it to open it.",
+    "previewTruncated": "Showing the beginning of the file",
+    "move": "Move",
+    "moved": "Moved",
+    "deleteLocalTitle": "Delete from this computer?",
+    "deleteLocalConfirm": "Delete {name} from this computer? This cannot be undone.",
+    "itemCount": "{count} items",
+    "deleteManyConfirm": "Delete {count} items from the server? This cannot be undone.",
+    "deleteLocalManyConfirm": "Delete {count} items from this computer? This cannot be undone.",
+    "copyPaths": "Copy paths"
+  },
+  "editor": {
+    "kindSession": "Session",
+    "kindConnection": "Connection"
+  },
+  "launcher": {
+    "title": "Start a session",
+    "subtitle": "Open a terminal on one of your saved connections.",
+    "searchPlaceholder": "Search by name, host or user",
+    "newConnection": "New connection",
+    "noMatches": "No connections match your search.",
+    "empty": "No connections yet",
+    "emptyHint": "Add an SSH connection to open a terminal or browse remote files."
+  }
+}

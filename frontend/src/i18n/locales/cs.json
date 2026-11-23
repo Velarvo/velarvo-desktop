@@ -1,0 +1,435 @@
+{
+  "vault": {
+    "onboarding": {
+      "title": "Nastavte hlavní heslo",
+      "subtitle": "Vytvořte heslo pro šifrování uložených připojení",
+      "stepMasterPassword": "Krok 1 ze 2 · Nastavení zabezpečení",
+      "stepCloudSync": "Krok 2 ze 2 · Volitelná cloud synchronizace",
+      "warning": "Důležité: Toto heslo nelze obnovit. Pokud ho zapomenete, ztratíte přístup ke všem datům.",
+      "masterPassword": "Hlavní heslo",
+      "confirmPassword": "Potvrďte hlavní heslo",
+      "passwordPlaceholder": "Alespoň 12 znaků",
+      "confirmPasswordPlaceholder": "Zadejte heslo znovu",
+      "passwordStrength": "Síla hesla",
+      "creatingVault": "Vytváření vaultu...",
+      "validation": {
+        "passwordMin": "Hlavní heslo musí mít alespoň 12 znaků"
+      },
+      "requirements": {
+        "minLength": "Alespoň 12 znaků",
+        "letter": "Obsahuje alespoň jedno písmeno",
+        "number": "Obsahuje alespoň jedno číslo"
+      },
+      "createVault": "Vytvořit vault",
+      "securityNote": "End-to-end šifrováno a uloženo lokálně",
+      "success": {
+        "title": "Vault vytvořen!",
+        "subtitle": "Vaše data jsou zabezpečená a uložená lokálně",
+        "masterPasswordReady": "Hlavní heslo je nastavené. Váš vault je nyní chráněný.",
+        "cloudSync": {
+          "title": "Synchronizovat mezi zařízeními?",
+          "description": "Vytvořte účet pro zálohu zašifrovaného vaultu",
+          "feature1": "Synchronizace mezi neomezeným počtem zařízení",
+          "feature2": "End-to-end šifrovaná záloha",
+          "feature3": "$5/měsíc",
+          "enable": "Zapnout cloud synchronizaci",
+          "skip": "Teď ne"
+        },
+        "laterNote": "Cloud synchronizaci můžete zapnout později v nastavení"
+      }
+    },
+    "unlock": {
+      "title": "Odemknout vault",
+      "subtitle": "Zadejte hlavní heslo pro dešifrování lokálního klíče vaultu pro toto sezení.",
+      "masterPassword": "Hlavní heslo",
+      "passwordPlaceholder": "Zadejte hlavní heslo",
+      "submit": "Odemknout vault",
+      "submitting": "Odemykání...",
+      "validation": {
+        "passwordRequired": "Hlavní heslo je povinné"
+      }
+    }
+  },
+  "errors": {
+    "ACCESS_DENIED": "Přístup ke složce byl odepřen",
+    "FILESYSTEM_INVALID_PATH": "Neplatná cesta.",
+    "FILESYSTEM_NOT_A_FILE": "Nejde o běžný soubor.",
+    "FILESYSTEM_TARGET_EXISTS": "Soubor s tímhle názvem už tam je.",
+    "INVALID_MASTER_PASSWORD": "Neplatné hlavní heslo",
+    "PATH_NOT_FOUND": "Zadaná cesta nebyla nalezena",
+    "PROJECT_DUPLICATE_NAME": "Projekt s tímto názvem už existuje",
+    "PROJECT_ICON_NOT_FOUND": "Ikona projektu nebyla nalezena",
+    "PROJECT_INVALID_INPUT": "Neplatná projektová data",
+    "PROJECT_NOT_FOUND": "Projekt nebyl nalezen",
+    "SETTINGS_UNSUPPORTED_VALUE": "Tato hodnota nastavení není podporována.",
+    "SSH_CONNECT_FAILED": "Nepodařilo se připojit k hostiteli. Zkontroluj adresu a přihlašovací údaje.",
+    "SSH_DUPLICATE_KEY": "Tento klíč už ve workspace je.",
+    "SSH_INVALID_INPUT": "Vyplň prosím povinná pole připojení.",
+    "SSH_INVALID_KEY": "SSH klíč se nepodařilo načíst. Zkontroluj klíč a jeho passphrase.",
+    "SSH_KEY_NOT_FOUND": "SSH klíč nenalezen.",
+    "SSH_NOT_CONNECTED": "Připojení není aktivní. Nejdřív se připoj.",
+    "SSH_NOT_FOUND": "SSH připojení nenalezeno.",
+    "SSH_NO_AUTH_METHOD": "Toto připojení nemá heslo ani klíč pro ověření.",
+    "SSH_NO_WORKSPACE": "Nejdřív vyber workspace.",
+    "SSH_TERMINAL_FAILED": "Relace terminálu selhala.",
+    "UNKNOWN": "Došlo k neočekávané chybě, zkuste to prosím znovu",
+    "VAULT_ALREADY_SETUP": "Vault už je nastaven",
+    "VAULT_LOCKED": "Vault je zamčený",
+    "VAULT_NOT_SETUP": "Vault ještě není nastaven",
+    "WEAK_MASTER_PASSWORD": "Hlavní heslo je příliš slabé",
+    "WORKSPACE_DUPLICATE_NAME": "Workspace s tímto názvem už v projektu existuje",
+    "WORKSPACE_INVALID_INPUT": "Neplatná data workspace",
+    "WORKSPACE_NOT_FOUND": "Workspace nebyl nalezen",
+    "WORKSPACE_PROJECT_MISSING": "Projekt workspace nebyl nalezen",
+    "SSH_SESSION_LIMIT": "Server odmítl další relaci na tomto spojení (limit MaxSessions). Zavři některý terminál nebo zvyš MaxSessions v sshd_config."
+  },
+  "validation": {
+    "confirmPasswordRequired": "Potvrďte prosím heslo",
+    "passwordsMismatch": "Hesla se neshodují"
+  },
+  "common": {
+    "save": "Uložit",
+    "cancel": "Zrušit",
+    "back": "Zpět",
+    "continue": "Pokračovat",
+    "loading": "Načítání...",
+    "e2eEncrypted": "End-to-end šifrovaný vault",
+    "and": "a",
+    "close": "Zavřít",
+    "active": "Aktivní",
+    "locked": "Zamčeno",
+    "unlocked": "Odemčeno",
+    "off": "Vypnuto",
+    "confirm": "Confirm",
+    "copied": "Zkopírováno",
+    "copy": "Kopírovat",
+    "optional": "Volitelné"
+  },
+  "vaultLayout": {
+    "heroLine1": "Desktopové nástroje pro",
+    "heroLine2": "databáze, API,",
+    "heroLine3Prefix": "a ",
+    "heroLine3Accent": "infrastrukturu",
+    "description": "Jedna aplikace pro databázový přístup, API požadavky, SSH relace a lokální připojení."
+  },
+  "settings": {
+    "title": "Nastavení",
+    "security": {
+      "nav": "Zabezpečení",
+      "title": "Zabezpečení",
+      "subtitle": "Jak je chráněný tvůj lokální vault.",
+      "vault": "Vault",
+      "vaultDescription": "Odemčený pro tuto relaci. Po zamčení bude znovu potřeba master password.",
+      "lockVault": "Zamknout",
+      "locking": "Zamykám...",
+      "autoLock": "Automatické zamčení",
+      "autoLockDescription": "Vault se sám zamkne po této době nečinnosti.",
+      "unlockMethod": "Způsob odemčení",
+      "unlockMethodDescription": "Klíč potřebný k dešifrování vaultu.",
+      "masterPassword": "Master password"
+    },
+    "preferences": {
+      "nav": "Předvolby",
+      "title": "Předvolby",
+      "subtitle": "Výchozí nastavení rozhraní pro toto zařízení.",
+      "language": "Jazyk",
+      "languageDescription": "Změna se projeví okamžitě."
+    }
+  },
+  "projects": {
+    "create": {
+      "badge": "Nový projekt",
+      "title": "Přidat nový projekt",
+      "subtitle": "Vytvořte nový projekt, pro který budete spravovat připojení.",
+      "name": "Název projektu",
+      "namePlaceholder": "Název projektu",
+      "icon": "Obrázek projektu",
+      "iconHint": "Nahrajte čtvercovou ikonu nebo obrázek.",
+      "chooseIcon": "Vybrat obrázek",
+      "removeIcon": "Odebrat obrázek projektu",
+      "preparingIcon": "Připravuji obrázek...",
+      "iconUnsupported": "Vyberte PNG, JPG nebo WebP obrázek.",
+      "iconTooLarge": "Obrázek je i po zmenšení pořád moc velký.",
+      "iconCanvasError": "Zpracování obrázku není dostupné.",
+      "iconFailed": "Obrázek projektu se nepodařilo připravit.",
+      "preview": "Náhled",
+      "previewFallback": "Název projektu",
+      "previewMeta": "Lokální vault projekt",
+      "create": "Vytvořit projekt",
+      "creating": "Vytváření projektu...",
+      "close": "Zavřít modal",
+      "validation": {
+        "nameRequired": "Název projektu je povinný"
+      }
+    }
+  },
+  "workspaces": {
+    "create": {
+      "title": "Vytvořit workspace",
+      "subtitle": "Workspace sdružuje prostředí v rámci projektu — například produkci, staging nebo lokál.",
+      "projectContext": "Projekt:",
+      "name": "Název workspace",
+      "namePlaceholder": "Název workspace",
+      "color": "Barevný akcent",
+      "preview": "Náhled",
+      "previewFallback": "Nový workspace",
+      "previewMeta": "Workspace ve vybraném projektu",
+      "create": "Vytvořit workspace",
+      "creating": "Vytváření workspace...",
+      "close": "Zavřít modal",
+      "validation": {
+        "nameRequired": "Název workspace je povinný.",
+        "projectRequired": "Před vytvořením workspace vyberte projekt."
+      }
+    }
+  },
+  "topbar": {
+    "projectsFallback": "Projekty",
+    "projectSwitcherTitle": "Přepínač projektů",
+    "projectSwitcherSubtitle": "Vyberte projekt",
+    "createProject": "Vytvořit projekt",
+    "projectsLoading": "Načítání projektů...",
+    "projectsEmpty": "Zatím tu nejsou žádné projekty. Vytvořte první a začněte si organizovat vault.",
+    "addProject": "Přidat projekt",
+    "workspaceFallback": "Workspace",
+    "workspaceSwitcherTitle": "Přepínač workspace",
+    "workspaceSwitcherSubtitle": "Nejprve vyberte projekt pro zobrazení workspace",
+    "workspaceNoProject": "Pro správu workspace vyberte projekt.",
+    "workspacesLoading": "Načítání workspace...",
+    "workspacesEmpty": "Pro tento projekt zatím nejsou žádné workspace. Vytvořte první.",
+    "createWorkspace": "Vytvořit workspace",
+    "addWorkspace": "Přidat workspace",
+    "search": "Hledat...",
+    "openSecuritySettings": "Otevřít nastavení zabezpečení",
+    "toggleSidebar": "Přepnout sidebar"
+  },
+  "explorer": {
+    "columns": {
+      "name": "Název",
+      "type": "Typ",
+      "size": "Velikost",
+      "modified": "Upraveno"
+    },
+    "searchPlaceholder": "Hledat soubory...",
+    "loading": "Načítání souborů...",
+    "empty": "Nebyly nalezeny žádné soubory",
+    "openContainer": "Otevřít složku",
+    "showHidden": "Zobrazit skryté soubory",
+    "hideHidden": "Skrýt skryté soubory",
+    "copy": "Kopírovat",
+    "copied": "Zkopírováno",
+    "dataSourceMissing": "Zdroj dat průzkumníku není nastaven",
+    "loadFailed": "Nepodařilo se načíst položky",
+    "initFailed": "Nepodařilo se inicializovat průzkumník",
+    "copyCurrentPath": "Kopírovat aktuální cestu",
+    "rename": "Přejmenovat",
+    "selectedCount": "{count} položek",
+    "back": "Zpět",
+    "forward": "Vpřed",
+    "home": "Domů",
+    "parent": "Nadřazená složka",
+    "refresh": "Obnovit"
+  },
+  "sidebar": {
+    "empty": "Zatím nemáte žádné sekce. Níže přidejte svou první vlastní sekci.",
+    "addSection": "Přidat sekci",
+    "resourceTypes": "Typy zdrojů",
+    "collections": "Kolekce",
+    "sectionNamePlaceholder": "Název sekce",
+    "blockNamePlaceholder": "Název bloku",
+    "newBlockName": "Nový blok",
+    "noConnections": "Zatím žádná připojení.",
+    "ariaLabels": {
+      "addNewBlock": "Přidat nový blok",
+      "sectionOptions": "Možnosti sekce",
+      "blockOptions": "Možnosti bloku",
+      "dragBlock": "Přetáhnout blok"
+    },
+    "menu": {
+      "addNewBlock": "Přidat nový blok",
+      "rename": "Přejmenovat",
+      "delete": "Smazat",
+      "deleteSection": "Smazat sekci"
+    },
+    "blockTypes": {
+      "rest": "REST API",
+      "graphql": "GraphQL",
+      "ssh": "SSH"
+    },
+    "rail": {
+      "ssh": {
+        "label": "SSH",
+        "shortLabel": "SSH"
+      },
+      "ftp": {
+        "label": "Přenos souborů",
+        "shortLabel": "FTP"
+      },
+      "databases": {
+        "label": "Databáze",
+        "shortLabel": "DB"
+      },
+      "api": {
+        "label": "API",
+        "shortLabel": "API"
+      }
+    },
+    "panels": {
+      "ssh": {
+        "eyebrow": "Přístup",
+        "title": "SSH připojení",
+        "searchPlaceholder": "Hledat SSH hosty...",
+        "empty": "Zatím tu nejsou žádná SSH připojení."
+      },
+      "ftp": {
+        "eyebrow": "Přenos",
+        "title": "Koncové body pro přenos souborů",
+        "searchPlaceholder": "Hledat FTP koncové body...",
+        "empty": "Zatím tu nejsou žádné FTP koncové body."
+      },
+      "databases": {
+        "eyebrow": "Data",
+        "title": "Databáze",
+        "searchPlaceholder": "Hledat připojení...",
+        "empty": "Zatím tu nejsou žádná databázová připojení."
+      }
+    },
+    "addSectionPanel": {
+      "title": "Přidat sekci",
+      "customSection": "Vlastní sekce",
+      "customSectionPlaceholder": "např. Messaging",
+      "add": "Přidat"
+    },
+    "createSSHConnection": "Nové SSH spojení"
+  },
+  "ssh": {
+    "password": "Heslo",
+    "passwordPlaceholder": "Heslo k připojení",
+    "passwordStored": "•••••••• (uloženo)",
+    "passwordEditHint": "Ponech prázdné pro zachování stávajícího hesla.",
+    "clearPassword": "Odstranit uložené heslo",
+    "passwordSet": "Nastaveno",
+    "showPassword": "Zobrazit heslo",
+    "hidePassword": "Skrýt heslo",
+    "saveAndConnect": "Uložit a připojit",
+    "connected": "Připojeno",
+    "strictHostKeyHint": "Ověří host key při prvním připojení a odmítne změny.",
+    "terminal": "Terminál",
+    "connecting": "Připojuji…",
+    "closed": "Ukončeno",
+    "connectionError": "Chyba připojení",
+    "reconnect": "Připojit znovu",
+    "terminalFailed": "Nepodařilo se otevřít terminál.",
+    "phaseChannel": "Zabezpečený kanál",
+    "phaseSession": "Shell relace",
+    "closedHint": "Vzdálený shell skončil. Připoj se znovu pro novou relaci.",
+    "viewOutput": "Výstup",
+    "ready": "Připraveno",
+    "needsAuth": "Chybí ověření",
+    "sectionConnection": "Připojení",
+    "fieldName": "Název",
+    "fieldHost": "Host",
+    "fieldPort": "Port",
+    "fieldUser": "Uživatel",
+    "sectionAuth": "Ověření",
+    "fieldKey": "SSH klíč",
+    "keyPlaceholderShort": "Vyber nebo vytvoř klíč",
+    "removeKey": "Odebrat klíč",
+    "authorizedKeysHint": "Veřejný klíč přidej na serveru do ~/.ssh/authorized_keys.",
+    "newKeyTitle": "Nový klíč",
+    "importKeyTitle": "Import vloženého klíče",
+    "keyName": "Název",
+    "keyType": "Typ",
+    "keyPassphrase": "Passphrase",
+    "optional": "Volitelné",
+    "working": "Pracuji…",
+    "generate": "Vygenerovat",
+    "import": "Importovat",
+    "fieldPassword": "Heslo",
+    "passwordKeep": "•••••••• (beze změny)",
+    "removePassword": "Odebrat heslo",
+    "addKey": "SSH klíč",
+    "addPassword": "Heslo",
+    "saved": "Uloženo",
+    "connect": "Připojit",
+    "keyPlaceholder": "Hledej klíče nebo vlož privátní klíč",
+    "sshKey": "SSH klíč",
+    "privateKey": "Privátní klíč",
+    "showSavedKeys": "Zobrazit uložené klíče",
+    "savedKeys": "Uložené klíče",
+    "importPastedKey": "Importovat vložený privátní klíč",
+    "importKeyHint": "Privátní klíč bude zašifrovaný ve vaultu.",
+    "publicKeyOnly": "Jen veřejný klíč",
+    "publicKeyOnlyHint": "Pro použitelný přístup vlož privátní klíč.",
+    "passphraseProtected": "S passphrase",
+    "noMatchingKeys": "Žádný uložený klíč neodpovídá",
+    "noSavedKeys": "Zatím žádné uložené klíče",
+    "keyEmptyHint": "Vytvoř nový klíč níže, nebo vlož privátní klíč a importuj ho.",
+    "createKeyNamed": "Vytvořit klíč",
+    "createNewKey": "Vytvořit nový klíč",
+    "createKeyHint": "Vygeneruje pár klíčů Ed25519, RSA nebo ECDSA",
+    "fingerprint": "Otisk",
+    "publicKey": "Veřejný klíč",
+    "collapsePublicKey": "Sbalit",
+    "expandPublicKey": "Zobrazit celý klíč"
+  },
+  "sftp": {
+    "active": "aktivní",
+    "clearFinished": "Vymazat dokončené",
+    "copyFailed": "Cestu se nepodařilo zkopírovat",
+    "copyPath": "Kopírovat cestu",
+    "copySuffix": "kopie",
+    "create": "Vytvořit",
+    "delete": "Smazat",
+    "deleteConfirm": "Opravdu smazat {name} ze serveru? Tuhle akci nejde vrátit.",
+    "deleted": "Smazáno",
+    "download": "Stáhnout",
+    "downloaded": "Staženo",
+    "dragHint": "Soubory přetáhni mezi panely",
+    "duplicate": "Duplikovat",
+    "files": "Soubory",
+    "folderName": "Název složky",
+    "newFolder": "Nová složka",
+    "newFolderPrompt": "Název nové složky",
+    "newName": "Nový název",
+    "noTransfers": "Zatím žádné přenosy.",
+    "pathCopied": "Cesta zkopírována",
+    "phaseSession": "SFTP relace",
+    "redo": "Znovu",
+    "remote": "Vzdálený",
+    "rename": "Přejmenovat",
+    "server": "Server",
+    "thisMac": "Tento počítač",
+    "title": "Přenos souborů",
+    "transfers": "Přenosy",
+    "undo": "Zpět",
+    "upload": "Nahrát",
+    "uploaded": "Nahráno",
+    "deleteTitle": "Smazat ze serveru?",
+    "previewLoading": "Načítám soubor...",
+    "previewBinary": "Tenhle soubor nejde zobrazit. Otevřeš ho až po přenosu.",
+    "previewTooLarge": "Soubor je na náhled moc velký. Otevřeš ho až po přenosu.",
+    "previewTruncated": "Zobrazen začátek souboru",
+    "move": "Přesunout",
+    "moved": "Přesunuto",
+    "deleteLocalTitle": "Smazat z tohohle počítače?",
+    "deleteLocalConfirm": "Opravdu smazat {name} z tohohle počítače? Tuhle akci nejde vrátit.",
+    "itemCount": "{count} položek",
+    "deleteManyConfirm": "Opravdu smazat {count} položek ze serveru? Tuhle akci nejde vrátit.",
+    "deleteLocalManyConfirm": "Opravdu smazat {count} položek z tohohle počítače? Tuhle akci nejde vrátit.",
+    "copyPaths": "Kopírovat cesty"
+  },
+  "editor": {
+    "kindSession": "Relace",
+    "kindConnection": "Připojení"
+  },
+  "launcher": {
+    "title": "Spustit relaci",
+    "subtitle": "Otevři terminál na jednom z uložených spojení.",
+    "searchPlaceholder": "Hledat podle názvu, hostitele nebo uživatele",
+    "newConnection": "Nové spojení",
+    "noMatches": "Hledání neodpovídá žádné spojení.",
+    "empty": "Zatím žádná spojení",
+    "emptyHint": "Přidej SSH spojení a otevři terminál nebo procházej vzdálené soubory."
+  }
+}

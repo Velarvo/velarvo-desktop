@@ -1,0 +1,60 @@
+name: Set up toolchain
+description: >-
+  Installs Go and Bun from the versions pinned in the repository, and
+  optionally the native Linux libraries and the Wails CLI matching go.mod.
+
+inputs:
+  go:
+    description: Install Go (version from go.mod)
+    default: "true"
+  bun:
+    description: Install Bun (version from .bun-version)
+    default: "true"
+  native-deps:
+    description: Install the GTK4 / WebKitGTK 6.0 headers Wails needs on Linux
+    default: "false"
+  wails:
+    description: Install the wails3 CLI at the version pinned in go.mod
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Go
+      if: inputs.go == 'true'
+      uses: actions/setup-go@v7
+      with:
+        go-version-file: go.mod
+        cache-dependency-path: go.sum
+
+    - name: Set up Bun
+      if: inputs.bun == 'true'
+      uses: oven-sh/setup-bun@v2
+      with:
+        bun-version-file: .bun-version
+
+    - name: Install Linux build dependencies
+      if: inputs.native-deps == 'true' && runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install --no-install-recommends -y \
+          build-essential \
+          pkg-config \
+          libgtk-4-dev \
+          libwebkitgtk-6.0-dev
+
+    - name: Install Wails CLI
+      if: inputs.wails == 'true'
+      shell: bash
+      run: |
+        version=$(go list -m -f '{{.Version}}' github.com/wailsapp/wails/v3)
+        go install "github.com/wailsapp/wails/v3/cmd/wails3@${version}"
+        wails3 version
+
+    - name: Provide an embed target for the Go build
+      if: inputs.go == 'true'
+      shell: bash
+      run: |
+        mkdir -p frontend/dist
+        [ -n "$(ls -A frontend/dist)" ] || echo '<!doctype html>' > frontend/dist/index.html

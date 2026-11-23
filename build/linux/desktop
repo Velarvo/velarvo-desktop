@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Name=Velarvo
+Comment=Developer workspace for SSH, SFTP, databases and APIs
+Exec=/usr/local/bin/velarvo %u
+Terminal=false
+Type=Application
+Icon=velarvo
+Categories=Development;
+StartupWMClass=velarvo
+

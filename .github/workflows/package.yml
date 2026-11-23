@@ -1,0 +1,308 @@
+name: Package
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: Version stamped into the packages, without the leading v
+        type: string
+        required: true
+      ref:
+        description: Git ref to build
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to stamp (defaults to <last release>-dev.<run number>)
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  version:
+    name: Resolve version
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
+      ref: ${{ steps.resolve.outputs.ref }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          persist-credentials: false
+
+      - id: resolve
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_REF: ${{ inputs.ref }}
+        run: |
+          version="${INPUT_VERSION#v}"
+          if [ -z "$version" ]; then
+            released=$(jq -r '."."' .release-please-manifest.json)
+            version="${released}-dev.${GITHUB_RUN_NUMBER}"
+          fi
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-+][0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::'$version' is not a semantic version"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "ref=${INPUT_REF:-$GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+          echo "Packaging **$version**" >> "$GITHUB_STEP_SUMMARY"
+
+  macos:
+    name: macOS / universal
+    needs: version
+    runs-on: macos-15
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      SIGN: ${{ secrets.MACOS_CERTIFICATE != '' }}
+      NOTARIZE: ${{ secrets.APPLE_API_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.version.outputs.ref }}
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+        with:
+          wails: "true"
+
+      - name: Stamp version
+        run: scripts/set-version.sh "$VERSION"
+
+      - name: Build app bundle
+        run: wails3 task darwin:package:universal
+
+      - name: Import Developer ID certificate
+        if: env.SIGN == 'true'
+        env:
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+        run: |
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          password=$(openssl rand -base64 32)
+          security create-keychain -p "$password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$password" "$keychain"
+          printf '%s' "$MACOS_CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/certificate.p12"
+          security import "$RUNNER_TEMP/certificate.p12" -k "$keychain" -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          rm -f "$RUNNER_TEMP/certificate.p12"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$password" "$keychain" > /dev/null
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          identity=$(security find-identity -v -p codesigning "$keychain" | awk -F'"' '/Developer ID Application/ { print $2; exit }')
+          if [ -z "$identity" ]; then
+            echo "::error::No 'Developer ID Application' identity found in MACOS_CERTIFICATE"
+            exit 1
+          fi
+          echo "SIGNING_IDENTITY=$identity" >> "$GITHUB_ENV"
+
+      - name: Sign app bundle
+        if: env.SIGN == 'true'
+        run: |
+          codesign --force --options runtime --timestamp --sign "$SIGNING_IDENTITY" bin/Velarvo.app
+          codesign --verify --strict --verbose=2 bin/Velarvo.app
+
+      - name: Build disk image
+        run: wails3 task darwin:create:dmg
+
+      - name: Sign disk image
+        if: env.SIGN == 'true'
+        run: codesign --force --timestamp --sign "$SIGNING_IDENTITY" bin/Velarvo.dmg
+
+      - name: Notarize disk image
+        if: env.SIGN == 'true' && env.NOTARIZE == 'true'
+        env:
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+        run: |
+          key="$RUNNER_TEMP/AuthKey.p8"
+          printf '%s' "$APPLE_API_KEY" > "$key"
+          xcrun notarytool submit bin/Velarvo.dmg \
+            --key "$key" --key-id "$APPLE_API_KEY_ID" --issuer "$APPLE_API_ISSUER" \
+            --wait --timeout 30m
+          rm -f "$key"
+          xcrun stapler staple bin/Velarvo.dmg
+          spctl --assess --type open --context context:primary-signature --verbose=2 bin/Velarvo.dmg
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p dist
+          mv bin/Velarvo.dmg "dist/Velarvo-${VERSION}-macos-universal.dmg"
+          ditto -c -k --keepParent bin/Velarvo.app "dist/Velarvo-${VERSION}-macos-universal.zip"
+          if [ "$SIGN" = "true" ] && [ "$NOTARIZE" = "true" ]; then
+            echo "macOS: signed and notarized" >> "$GITHUB_STEP_SUMMARY"
+          elif [ "$SIGN" = "true" ]; then
+            echo "::warning::macOS build is signed but not notarized; Gatekeeper will block it"
+          else
+            echo "::warning::macOS build is ad-hoc signed; users must allow it in System Settings → Privacy & Security"
+          fi
+
+      - uses: actions/attest-build-provenance@v4
+        if: github.event.repository.private == false
+        with:
+          subject-path: dist/*
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: velarvo-macos
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 14
+
+  windows:
+    name: Windows / x64
+    needs: version
+    runs-on: windows-2025
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    defaults:
+      run:
+        shell: bash
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      SIGN: ${{ secrets.AZURE_CLIENT_ID != '' }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.version.outputs.ref }}
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+        with:
+          wails: "true"
+
+      - name: Install NSIS
+        shell: pwsh
+        run: |
+          choco install nsis -y --no-progress
+          "C:\Program Files (x86)\NSIS" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Stamp version
+        run: scripts/set-version.sh "$VERSION"
+
+      - name: Build executable
+        run: wails3 task windows:build ARCH=amd64
+
+      - name: Sign executable
+        if: env.SIGN == 'true'
+        uses: azure/artifact-signing-action@v2
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ secrets.AZURE_SIGNING_ENDPOINT }}
+          signing-account-name: ${{ secrets.AZURE_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ secrets.AZURE_CERTIFICATE_PROFILE }}
+          files: ${{ github.workspace }}\bin\velarvo.exe
+          file-digest: SHA256
+          timestamp-digest: SHA256
+          description: Velarvo
+
+      - name: Build installer
+        working-directory: build/windows/nsis
+        run: |
+          wails3 generate webview2bootstrapper -dir .
+          makensis -DARG_WAILS_AMD64_BINARY="$(cygpath -w "$GITHUB_WORKSPACE/bin/velarvo.exe")" project.nsi
+
+      - name: Sign installer
+        if: env.SIGN == 'true'
+        uses: azure/artifact-signing-action@v2
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ secrets.AZURE_SIGNING_ENDPOINT }}
+          signing-account-name: ${{ secrets.AZURE_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ secrets.AZURE_CERTIFICATE_PROFILE }}
+          files: ${{ github.workspace }}\bin\Velarvo-amd64-installer.exe
+          file-digest: SHA256
+          timestamp-digest: SHA256
+          description: Velarvo Setup
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p dist
+          mv bin/Velarvo-amd64-installer.exe "dist/Velarvo-${VERSION}-windows-x64-installer.exe"
+          (cd bin && 7z a -tzip "../dist/Velarvo-${VERSION}-windows-x64-portable.zip" velarvo.exe > /dev/null)
+          if [ "$SIGN" != "true" ]; then
+            echo "::warning::Windows build is not code-signed; SmartScreen will warn on first launch"
+          fi
+
+      - uses: actions/attest-build-provenance@v4
+        if: github.event.repository.private == false
+        with:
+          subject-path: dist/*
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: velarvo-windows
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 14
+
+  linux:
+    name: Linux / x86_64
+    needs: version
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.version.outputs.ref }}
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+        with:
+          native-deps: "true"
+          wails: "true"
+
+      - name: Install AppImage dependencies
+        run: sudo apt-get install --no-install-recommends -y libfuse2t64 file
+
+      - name: Stamp version
+        run: scripts/set-version.sh "$VERSION"
+
+      - name: Build packages
+        run: |
+          wails3 task linux:create:appimage
+          wails3 task linux:create:deb
+          wails3 task linux:create:rpm
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p dist
+          shopt -s failglob
+          mv bin/*.AppImage "dist/Velarvo-${VERSION}-linux-x86_64.AppImage"
+          mv bin/*.deb "dist/Velarvo-${VERSION}-linux-amd64.deb"
+          mv bin/*.rpm "dist/Velarvo-${VERSION}-linux-x86_64.rpm"
+
+      - uses: actions/attest-build-provenance@v4
+        if: github.event.repository.private == false
+        with:
+          subject-path: dist/*
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: velarvo-linux
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 14
