@@ -91,6 +91,28 @@
   pointer-events: none;
 }
 
+/* Window title bar: empty space drags the window and double-click maximises it,
+   but interactive controls opt out so double-clicking them does nothing to the window. */
+.titlebar {
+  --wails-draggable: drag;
+}
+
+.titlebar
+  :is(
+    button,
+    a,
+    input,
+    select,
+    textarea,
+    kbd,
+    [role='button'],
+    [role='menu'],
+    [role='combobox'],
+    [contenteditable='true']
+  ) {
+  --wails-draggable: no-drag;
+}
+
 .no-select {
   -webkit-user-select: none;
   -moz-user-select: none;

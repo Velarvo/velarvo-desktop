@@ -155,8 +155,7 @@
 {/snippet}
 
 <header
-  class="pl-25 relative z-300 flex h-14 items-center gap-1 border-b border-border bg-surface-base/95 px-3 backdrop-blur-sm"
-  style="--wails-draggable: drag;"
+  class="titlebar pl-25 relative z-300 flex h-14 items-center gap-1 border-b border-border bg-surface-base/95 px-3 backdrop-blur-sm"
 >
   <IconButton
     tooltipPlacement="bottom"
