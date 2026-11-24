@@ -223,6 +223,10 @@
     "initFailed": "Nepodařilo se inicializovat průzkumník",
     "copyCurrentPath": "Kopírovat aktuální cestu",
     "rename": "Přejmenovat",
+    "newFolder": "Nová složka",
+    "newFolderName": "Název nové složky",
+    "newFile": "Nový soubor",
+    "newFileName": "Název nového souboru",
     "selectedCount": "{count} položek",
     "back": "Zpět",
     "forward": "Vpřed",
@@ -390,6 +394,7 @@
     "files": "Soubory",
     "folderName": "Název složky",
     "newFolder": "Nová složka",
+    "newFile": "Nový soubor",
     "newFolderPrompt": "Název nové složky",
     "newName": "Nový název",
     "noTransfers": "Zatím žádné přenosy.",
@@ -417,7 +422,8 @@
     "itemCount": "{count} položek",
     "deleteManyConfirm": "Opravdu smazat {count} položek ze serveru? Tuhle akci nejde vrátit.",
     "deleteLocalManyConfirm": "Opravdu smazat {count} položek z tohohle počítače? Tuhle akci nejde vrátit.",
-    "copyPaths": "Kopírovat cesty"
+    "copyPaths": "Kopírovat cesty",
+    "invalidName": "Název nesmí obsahovat / ani \\"
   },
   "editor": {
     "kindSession": "Relace",

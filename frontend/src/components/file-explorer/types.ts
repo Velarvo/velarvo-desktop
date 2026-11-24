@@ -55,6 +55,10 @@ export interface ExplorerLabels {
   empty: string
   openContainer: string
   rename: string
+  newFolder: string
+  newFolderName: string
+  newFile: string
+  newFileName: string
   selectedCount: string
 }
 

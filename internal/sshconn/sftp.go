@@ -2,6 +2,7 @@ package sshconn
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -122,7 +123,30 @@ func (s *SFTP) Mkdir(connectionID, dir string) error {
 	if err != nil {
 		return err
 	}
-	return client.MkdirAll(dir)
+	if _, err := client.Lstat(dir); err == nil {
+		return files.ErrTargetExists
+	} else if !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+	return client.Mkdir(dir)
+}
+
+func (s *SFTP) CreateFile(connectionID, target string) error {
+	client, err := s.client(connectionID)
+	if err != nil {
+		return err
+	}
+	if _, err := client.Lstat(target); err == nil {
+		return files.ErrTargetExists
+	} else if !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+
+	file, err := client.OpenFile(target, os.O_WRONLY|os.O_CREATE|os.O_EXCL)
+	if err != nil {
+		return err
+	}
+	return file.Close()
 }
 
 func (s *SFTP) Remove(connectionID, target string) error {

@@ -102,6 +102,8 @@
       y: number
     }) => void
     onRenameNode?: (detail: { node: ExplorerNode; name: string }) => void
+    onCreateFolder?: (detail: { directory: string; name: string }) => void
+    onCreateFile?: (detail: { directory: string; name: string }) => void
     onNodeDrop?: (detail: { node: ExplorerNode }) => void
     onNodeDropTarget?: (detail: { node: ExplorerNode | null }) => void
     onDeleteNodes?: (detail: { nodes: ExplorerNode[] }) => void
@@ -136,6 +138,8 @@
     onNodeDragEnd,
     onNodeContextMenu,
     onRenameNode,
+    onCreateFolder,
+    onCreateFile,
     onNodeDrop,
     onNodeDropTarget,
     onDeleteNodes,
@@ -332,6 +336,7 @@
 
   const navigateToPath = async (path: string, options?: NavigationOptions) => {
     cancelRename()
+    cancelDraft()
     const normalizedPath = normalizeCurrentPath(path)
     const generation = cacheGeneration
     const cacheKey = getScopedCacheKey(normalizedPath, generation)
@@ -700,6 +705,90 @@
     if (isRenaming(node)) commitRename(node)
   }
 
+  type DraftKind = 'folder' | 'file'
+  type Draft = { kind: DraftKind; directory: string; name: string }
+
+  let draft = $state<Draft | null>(null)
+  let draftField = $state<HTMLInputElement | null>(null)
+
+  const nameTaken = (name: string) =>
+    nodes.some((node) => node.name.toLowerCase() === name.toLowerCase())
+
+  let draftInvalid = $derived(draft ? nameTaken(draft.name.trim()) : false)
+
+  const uniqueName = (base: string) => {
+    const stem = fileStemLength(base)
+    const head = base.slice(0, stem)
+    const extension = base.slice(stem)
+    let candidate = base
+    for (let counter = 2; nameTaken(candidate); counter += 1) {
+      candidate = `${head} ${counter}${extension}`
+    }
+    return candidate
+  }
+
+  const startDraft = async (kind: DraftKind) => {
+    if (!currentPath || isLoading) return
+    cancelRename()
+    clearSelection()
+    searchQuery = ''
+    const name = uniqueName(
+      kind === 'folder' ? mergedLabels.newFolder : mergedLabels.newFile,
+    )
+    draft = { kind, directory: currentPath, name }
+    await tick()
+
+    draftField?.scrollIntoView({ block: 'nearest' })
+    draftField?.focus()
+    draftField?.setSelectionRange(
+      0,
+      kind === 'file' ? fileStemLength(name) : name.length,
+    )
+  }
+
+  export const startCreateFolder = () => startDraft('folder')
+
+  export const startCreateFile = () => startDraft('file')
+
+  const cancelDraft = () => {
+    draft = null
+  }
+
+  const commitDraft = () => {
+    const current = draft
+    if (!current) return
+    const name = current.name.trim()
+    if (name && nameTaken(name)) return
+    cancelDraft()
+    if (!name || current.directory !== currentPath) return
+    const detail = { directory: current.directory, name }
+    if (current.kind === 'folder') {
+      onCreateFolder?.(detail)
+    } else {
+      onCreateFile?.(detail)
+    }
+  }
+
+  const handleDraftKeydown = (event: KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      commitDraft()
+      return
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      cancelDraft()
+    }
+  }
+
+  const handleDraftBlur = () => {
+    if (draftInvalid) {
+      cancelDraft()
+      return
+    }
+    commitDraft()
+  }
+
   let dragChip: HTMLElement | null = null
   let draggedNodes: ExplorerNode[] | null = null
 
@@ -912,6 +1001,10 @@
     empty: t('explorer.empty'),
     openContainer: t('explorer.openContainer'),
     rename: t('explorer.rename'),
+    newFolder: t('explorer.newFolder'),
+    newFolderName: t('explorer.newFolderName'),
+    newFile: t('explorer.newFile'),
+    newFileName: t('explorer.newFileName'),
     selectedCount: t('explorer.selectedCount'),
   })
   let mergedLabels = $derived({ ...defaultExplorerLabels, ...labels })
@@ -1145,7 +1238,7 @@
       >
         {mergedLabels.loading}
       </div>
-    {:else if filtered.length === 0}
+    {:else if filtered.length === 0 && !draft}
       <div
         class="h-full flex items-center justify-center text-sm text-muted-foreground"
       >
@@ -1214,6 +1307,47 @@
             </tr>
           </thead>
           <tbody>
+            {#if draft}
+              <tr class="border-b border-border/60 bg-primary/10 select-none">
+                <td class="px-3 py-1.5 min-w-0 max-w-0">
+                  <div class="flex w-full min-w-0 items-center gap-2">
+                    <FileIcon
+                      name={draft.name}
+                      isContainer={draft.kind === 'folder'}
+                    />
+                    <input
+                      bind:this={draftField}
+                      bind:value={draft.name}
+                      type="text"
+                      autocomplete="off"
+                      autocapitalize="off"
+                      autocorrect="off"
+                      spellcheck="false"
+                      aria-label={draft.kind === 'folder'
+                        ? mergedLabels.newFolderName
+                        : mergedLabels.newFileName}
+                      aria-invalid={draftInvalid}
+                      class={[
+                        'h-6 min-w-0 flex-1 rounded border bg-fill-hover px-1.5 text-sm leading-none text-white outline-none',
+                        draftInvalid
+                          ? 'border-destructive/70'
+                          : 'border-primary/50',
+                      ]}
+                      onclick={(event) => event.stopPropagation()}
+                      ondblclick={(event) => event.stopPropagation()}
+                      onkeydown={handleDraftKeydown}
+                      onblur={handleDraftBlur}
+                    />
+                  </div>
+                </td>
+                {#each columns as column (column.id)}
+                  <td
+                    class="px-3 py-1.5 {column.cellClass ??
+                      ''} {getResponsiveHideClass(column)}"
+                  ></td>
+                {/each}
+              </tr>
+            {/if}
             {#each filtered as node (node.id)}
               <tr
                 class="border-b border-border/60 {draggableNodes

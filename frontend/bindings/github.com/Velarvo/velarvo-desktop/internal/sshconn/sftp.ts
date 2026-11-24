@@ -13,6 +13,10 @@ export function Copy(connectionID: string, $from: string, to: string): $Cancella
     return $Call.ByID(2535316957, connectionID, $from, to);
 }
 
+export function CreateFile(connectionID: string, target: string): $CancellablePromise<void> {
+    return $Call.ByID(2628210898, connectionID, target);
+}
+
 export function Download(connectionID: string, remotePath: string, localPath: string, transferID: string): $CancellablePromise<void> {
     return $Call.ByID(3392069776, connectionID, remotePath, localPath, transferID);
 }

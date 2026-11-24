@@ -167,6 +167,9 @@ export const clearSettledTransfers = () => {
 export const createRemoteDirectory = (connectionId: string, path: string) =>
   SFTP.Mkdir(connectionId, path)
 
+export const createRemoteFile = (connectionId: string, path: string) =>
+  SFTP.CreateFile(connectionId, path)
+
 export const removeRemotePath = (connectionId: string, path: string) =>
   SFTP.Remove(connectionId, path)
 

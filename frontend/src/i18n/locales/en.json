@@ -223,6 +223,10 @@
     "initFailed": "Failed to initialize explorer",
     "copyCurrentPath": "Copy current path",
     "rename": "Rename",
+    "newFolder": "New folder",
+    "newFolderName": "New folder name",
+    "newFile": "New file",
+    "newFileName": "New file name",
     "selectedCount": "{count} items",
     "back": "Back",
     "forward": "Forward",
@@ -390,6 +394,7 @@
     "files": "Files",
     "folderName": "Folder name",
     "newFolder": "New folder",
+    "newFile": "New file",
     "newFolderPrompt": "New folder name",
     "newName": "New name",
     "noTransfers": "No transfers yet.",
@@ -417,7 +422,8 @@
     "itemCount": "{count} items",
     "deleteManyConfirm": "Delete {count} items from the server? This cannot be undone.",
     "deleteLocalManyConfirm": "Delete {count} items from this computer? This cannot be undone.",
-    "copyPaths": "Copy paths"
+    "copyPaths": "Copy paths",
+    "invalidName": "The name cannot contain / or \\"
   },
   "editor": {
     "kindSession": "Session",

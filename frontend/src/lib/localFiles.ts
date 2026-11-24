@@ -32,3 +32,7 @@ export const renameLocalPath = (from: string, to: string) =>
   Files.Rename(from, to)
 
 export const removeLocalPath = (path: string) => Files.Remove(path)
+
+export const createLocalDirectory = (path: string) => Files.Mkdir(path)
+
+export const createLocalFile = (path: string) => Files.CreateFile(path)

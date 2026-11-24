@@ -7,6 +7,7 @@
     ArrowUpFromLine,
     ClipboardCopy,
     Copy,
+    FilePlus,
     FolderPlus,
     HardDrive,
     ListEnd,
@@ -37,6 +38,8 @@
   import PromptDialog from '@/components/ui/PromptDialog.svelte'
   import { copyText } from '@/lib/clipboard'
   import {
+    createLocalDirectory,
+    createLocalFile,
     localBaseName,
     localJoin,
     localParent,
@@ -55,6 +58,7 @@
   import {
     copyRemotePath,
     createRemoteDirectory,
+    createRemoteFile,
     createSFTPDataSource,
     downloadFile,
     openRemoteHome,
@@ -168,6 +172,8 @@
     baseName: (path: string) => string
     rename: (from: string, to: string) => Promise<void>
     remove: (path: string) => Promise<void>
+    mkdir: (path: string) => Promise<void>
+    createFile: (path: string) => Promise<void>
   }
 
   const sides: Record<Side, SideOps> = {
@@ -179,6 +185,8 @@
       baseName: localBaseName,
       rename: renameLocalPath,
       remove: removeLocalPath,
+      mkdir: createLocalDirectory,
+      createFile: createLocalFile,
     },
     remote: {
       explorer: () => remoteExplorer,
@@ -188,6 +196,8 @@
       baseName: remoteBaseName,
       rename: (from, to) => renameRemotePath(connectionId, from, to),
       remove: (path) => removeRemotePath(connectionId, path),
+      mkdir: (path) => createRemoteDirectory(connectionId, path),
+      createFile: (path) => createRemoteFile(connectionId, path),
     },
   }
 
@@ -482,23 +492,44 @@
     })
   }
 
-  const newRemoteFolder = () =>
-    askName({
-      title: t('sftp.newFolder', 'New folder'),
-      label: t('sftp.folderName', 'Folder name'),
-      confirmLabel: t('sftp.create', 'Create'),
-      value: '',
-      onSubmit: async (name) => {
-        const target = remoteJoin(remotePath, name)
-        await createRemoteDirectory(connectionId, target)
-        remoteExplorer?.refresh()
-        history.push({
-          label: `${t('sftp.newFolder', 'New folder')} ${name}`,
-          undo: () => removeRemotePath(connectionId, target),
-          redo: () => createRemoteDirectory(connectionId, target),
-        })
-      },
-    })
+  const isValidName = (name: string) =>
+    name !== '.' && name !== '..' && !/[\\/]/.test(name)
+
+  type EntryKind = 'folder' | 'file'
+
+  const createEntry = async (
+    side: Side,
+    kind: EntryKind,
+    detail: { directory: string; name: string },
+  ) => {
+    const label =
+      kind === 'folder'
+        ? t('sftp.newFolder', 'New folder')
+        : t('sftp.newFile', 'New file')
+    if (!isValidName(detail.name)) {
+      flash(
+        `${label}: ${t('sftp.invalidName', 'The name cannot contain / or \\')}`,
+        true,
+      )
+      return
+    }
+
+    const ops = sides[side]
+    const target = ops.join(detail.directory, detail.name)
+    const create = () =>
+      kind === 'folder' ? ops.mkdir(target) : ops.createFile(target)
+    try {
+      await create()
+      ops.explorer()?.refresh()
+      history.push({
+        label: `${label} ${detail.name}`,
+        undo: () => ops.remove(target),
+        redo: create,
+      })
+    } catch (error) {
+      fail(error, label)
+    }
+  }
 
   let pendingDelete = $state<{ side: Side; nodes: ExplorerNode[] } | null>(null)
 
@@ -706,7 +737,7 @@
   <MenuItem {icon} {label} {danger} onclick={fromMenu(label, action)} />
 {/snippet}
 
-{#snippet paneHeader(icon: IconComponent, label: string)}
+{#snippet paneHeader(icon: IconComponent, label: string, side: Side)}
   {@const SvelteComponent_1 = icon}
   <div class="flex h-9 shrink-0 items-center gap-2 border-b border-border px-3">
     <SvelteComponent_1 size={13} class="shrink-0 text-primary" />
@@ -715,6 +746,21 @@
     >
       {label}
     </span>
+    <IconButton
+      icon={FolderPlus}
+      size="xs"
+      class="ml-auto"
+      tooltipPlacement="bottom-end"
+      label={t('sftp.newFolder', 'New folder')}
+      onclick={() => void sides[side].explorer()?.startCreateFolder()}
+    />
+    <IconButton
+      icon={FilePlus}
+      size="xs"
+      tooltipPlacement="bottom-end"
+      label={t('sftp.newFile', 'New file')}
+      onclick={() => void sides[side].explorer()?.startCreateFile()}
+    />
   </div>
 {/snippet}
 
@@ -804,12 +850,6 @@
         </span>
 
         <IconButton
-          icon={FolderPlus}
-          size="sm"
-          label={t('sftp.newFolder', 'New folder')}
-          onclick={newRemoteFolder}
-        />
-        <IconButton
           icon={Trash2}
           size="sm"
           danger
@@ -830,7 +870,11 @@
         ondragleave={(event) => onPaneDragLeave('local', event)}
         ondrop={(event) => onPaneDrop('local', event)}
       >
-        {@render paneHeader(HardDrive, t('sftp.thisMac', 'This computer'))}
+        {@render paneHeader(
+          HardDrive,
+          t('sftp.thisMac', 'This computer'),
+          'local',
+        )}
 
         <FileExplorer
           bind:this={localExplorer}
@@ -852,6 +896,9 @@
           onNodeDropTarget={(event) => onNodeDropTarget('local', event)}
           onRenameNode={(detail) =>
             void renameNode('local', detail.node, detail.name)}
+          onCreateFolder={(detail) =>
+            void createEntry('local', 'folder', detail)}
+          onCreateFile={(detail) => void createEntry('local', 'file', detail)}
           onNodeContextMenu={(event) => openMenu('local', event)}
           onDeleteNodes={(detail) => askDelete('local', detail.nodes)}
         />
@@ -867,7 +914,7 @@
         ondragleave={(event) => onPaneDragLeave('remote', event)}
         ondrop={(event) => onPaneDrop('remote', event)}
       >
-        {@render paneHeader(Server, t('sftp.server', 'Server'))}
+        {@render paneHeader(Server, t('sftp.server', 'Server'), 'remote')}
 
         <FileExplorer
           bind:this={remoteExplorer}
@@ -887,6 +934,9 @@
           onSelect={(detail) => (remoteSelection = detail.nodes)}
           onRenameNode={(detail) =>
             void renameNode('remote', detail.node, detail.name)}
+          onCreateFolder={(detail) =>
+            void createEntry('remote', 'folder', detail)}
+          onCreateFile={(detail) => void createEntry('remote', 'file', detail)}
           onActivate={onRemoteActivate}
           containerDropTargets
           dropActive={acceptsRemoteDrop}

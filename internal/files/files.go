@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"slices"
@@ -125,4 +126,37 @@ func (Service) Remove(path string) error {
 		return fmt.Errorf("remove %s: %w", path, err)
 	}
 	return nil
+}
+
+func (Service) Mkdir(path string) error {
+	path = filepath.Clean(path)
+
+	if path == "." {
+		return ErrInvalidPath
+	}
+
+	if err := os.Mkdir(path, 0o755); err != nil {
+		if errors.Is(err, fs.ErrExist) {
+			return ErrTargetExists
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (Service) CreateFile(path string) error {
+	path = filepath.Clean(path)
+	if path == "." {
+		return ErrInvalidPath
+	}
+
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+	if err != nil {
+		if errors.Is(err, fs.ErrExist) {
+			return ErrTargetExists
+		}
+		return err
+	}
+	return file.Close()
 }
