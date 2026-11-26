@@ -135,7 +135,7 @@ func (Service) Mkdir(path string) error {
 		return ErrInvalidPath
 	}
 
-	if err := os.Mkdir(path, 0o755); err != nil {
+	if err := os.Mkdir(path, 0o750); err != nil {
 		if errors.Is(err, fs.ErrExist) {
 			return ErrTargetExists
 		}
@@ -151,7 +151,7 @@ func (Service) CreateFile(path string) error {
 		return ErrInvalidPath
 	}
 
-	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o600)
 	if err != nil {
 		if errors.Is(err, fs.ErrExist) {
 			return ErrTargetExists
